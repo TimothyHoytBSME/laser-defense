@@ -30,12 +30,12 @@ var paths = new Array(numPaths).fill([]);
 var gold = 100;
 var numEnemies = 30;
 var theEnemies = []
-var enemyDelay = 100;
+var enemyDelay = 50;
 var eDelayCount = 0;
 var activeEnemies = 0;
 var theDefences = [];
 var waveRunning = true;
-
+var theBase = {}
 
 //Main Animation Loop
 const mainLoop = function(){
@@ -135,9 +135,13 @@ const drawEnemies = function(){
 }
 
 const drawLasers = function(){
-    for(var i=0; i<theDefences.length; i++){
-        theDefences[i].drawLaser()
+    if(waveRunning){
+        for(var i=0; i<theDefences.length; i++){
+            theDefences[i].drawLaser()
+        }
+        theBase.drawLaser()
     }
+    
 }
 
 const moveEnemies = function(){
@@ -299,6 +303,8 @@ class Piece {
         this.health = 100;
         this.enemyNum = -1;
         this.range = 4;
+        this.damage = 0.5;
+
         this.draw = () => {
             
             this.color = (this.type=="base")? [0,0,123] : (this.type=="defense")? [160,160,160] : (this.type=="path")? [123, 123, 123]  : this.color
@@ -306,8 +312,8 @@ class Piece {
             
             fillRec([this.left, this.top, pieceSize, pieceSize], colText(col));
             
-            if(this.type == "base" || this.type == "defense"){
-            fillRec([this.left, this.top+pieceSize*0.9, pieceSize, pieceSize*0.1], colText([123,255,0]))
+            if(this.type == "base"){
+                fillRec([this.left, this.top+pieceSize*0.9, pieceSize*this.health/100, pieceSize*0.1], colText([123,255,0]))
 
             }
         }
@@ -337,7 +343,21 @@ class Piece {
             }
 
             if(this.enemy > -1){
-                drawLine(sor,tar,3,colText([0,200,200]))
+                var sz = 3; var co = [0,200,200]
+                if(this.type == "base"){
+                    sz = 5; co = [200,123,50]
+                }
+                drawLine(sor,tar,sz,colText(co))
+                var theenemy = theEnemies[this.enemy]
+                if(theenemy.health > this.damage){
+                    theenemy.health-=this.damage
+                }else{
+                    theenemy.health = 0
+                    theenemy.destroy()
+                    this.enemy = -1;
+                }
+                
+
             }
         }
     }
@@ -353,6 +373,7 @@ class Enemy {
         this.from = [-1,-1]
         this.to  = [-1,-1]
         this.health = 100;
+        this.damage = 10;
         this.pathNum = pathnum;
         console.log(paths)
         console.log(pathnum)
@@ -369,7 +390,7 @@ class Enemy {
 
             if(this.visible){
                 fillRec([this.left, this.top, pieceSize/2, pieceSize/2], colText(this.color));
-                fillRec([this.left, this.top+pieceSize/2*0.9, pieceSize/2, pieceSize/2*0.1], colText([123,255,0]))
+                fillRec([this.left, this.top+pieceSize/2*0.9, (pieceSize/2)*this.health/100, pieceSize/2*0.1], colText([123,255,0]))
             }
 
         }
@@ -400,7 +421,15 @@ class Enemy {
                     this.pathStep = this.pathStep - 1;
                     if(this.pathStep < - 0){
                         //hit base
-                        
+                        if(theBase.health > this.damage){
+                            theBase.health-= this.damage
+                        }else{
+                            theBase.health = 0
+                            waveRunning = false;
+
+                        }
+
+
                         this.destroy()
                     }else{
                         
@@ -451,16 +480,19 @@ const genGrid = function(){
 
     ranGrid()
 
-    var thebase = [floor(gridDims[0]/2),floor(gridDims[1]/2)]//[floor(random()*gridDims[0]),floor(random()*gridDims[1])]
-    gameGrid[thebase[0]][thebase[1]].type = "base"
-
+    var baseP = [floor(gridDims[0]/2),floor(gridDims[1]/2)]//[floor(random()*gridDims[0]),floor(random()*gridDims[1])]
+    
+    theBase = gameGrid[baseP[0]][baseP[1]]
+    theBase.type = "base"
+    theBase.damage = 1;
+    theBase.range = 8
     //todo generate paths
     
     for(var p=0; p<numPaths; p++){
         var path = []
         var xd = p*2-1;
         var yd = 0;
-        path.push([...thebase])
+        path.push([...baseP])
         var done = false;
 
         while(!done){
