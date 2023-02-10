@@ -26,6 +26,10 @@ const degAtan2 = function(P1, P2){
     return ang
 }
 
+const dist = function(a,b){
+    return sqrt((b[0]-a[0])**2 + (b[1]-a[1])**2)
+}
+
 const avg = function(a,b){
     return (a+b)/2
 }

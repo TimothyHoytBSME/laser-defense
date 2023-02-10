@@ -21,12 +21,21 @@ var returnBox = [] //gets calculated
 var gameActive = true; //gets calculated
 var difficulty = 0 //gets calculated
 var difficulties = ["EASY","CHALLENGE","IMPOSSIBLE"]
-var score = [0,0,0,0,0,0,0,0,0]; //gets calculated
+var score = 0; //gets calculated
 var justScored = false; //gets calculated
 var gridSizePix = [1,1] //gets calculated
 var gridPos = [10,10] //gets calculated
 var numPaths = 2;
 var paths = new Array(numPaths).fill([]);
+var gold = 100;
+var numEnemies = 30;
+var theEnemies = []
+var enemyDelay = 100;
+var eDelayCount = 0;
+var activeEnemies = 0;
+var theDefences = [];
+var waveRunning = true;
+
 
 //Main Animation Loop
 const mainLoop = function(){
@@ -39,6 +48,18 @@ const mainLoop = function(){
 
     if(gameActive){
         drawBoard()
+
+        if(waveRunning){
+            activateEnemy()
+        }
+
+        drawEnemies()
+
+        drawLasers()
+
+        if(waveRunning){
+            moveEnemies();
+        }
     }else{
         console.log('Game Paused')
     }
@@ -83,6 +104,48 @@ const drawBoard = function(){
     }
 }
 
+const activateEnemy = function(){
+    eDelayCount++
+    if(eDelayCount>enemyDelay){
+        if(activeEnemies < theEnemies.length){
+            activeEnemies++
+            var activatedEnemy = theEnemies[activeEnemies-1]
+            // activatedEnemy.left = (200+10*activeEnemies)
+            // activatedEnemy.top = (100+20*activeEnemies)
+            console.log('activating', activatedEnemy)
+            console.log('its path', activatedEnemy.pathNum)
+            var activePath = [...paths[activatedEnemy.pathNum]]
+            var startP = activePath[activePath.length -1]
+            var nextP = activePath[activePath.length -2]
+            activatedEnemy.from = [...startP]
+            activatedEnemy.to = [...nextP]
+            console.log(activatedEnemy.to)
+            activatedEnemy.left = gameGrid[startP[0]][startP[1]].left+pieceSize/4
+            activatedEnemy.top = gameGrid[startP[0]][startP[1]].top+ pieceSize/4
+
+        }
+        eDelayCount = 0
+    }
+}
+
+const drawEnemies = function(){
+    for(var i=0; i<theEnemies.length; i++){
+        theEnemies[i].draw()
+    }
+}
+
+const drawLasers = function(){
+    for(var i=0; i<theDefences.length; i++){
+        theDefences[i].drawLaser()
+    }
+}
+
+const moveEnemies = function(){
+    for(var i=0; i<theEnemies.length; i++){
+        theEnemies[i].move()
+    }
+}
+
 const drawTexts = function(){
     if(verticalOrien){
         textW = gameRec[2]/5
@@ -108,8 +171,8 @@ const drawTexts = function(){
         if(verticalOrien){
             shadowText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1], "SCORE", textH*0.75, "black")
             fillText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1], "SCORE", textH*0.75, "white")
-            shadowText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1]+textH, score[difficulty].toString(), textH*0.75, "black")
-            fillText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1]+textH, score[difficulty].toString(), textH*0.75, "white")
+            shadowText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1]+textH, score.toString(), textH*0.75, "black")
+            fillText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1]+textH, score.toString(), textH*0.75, "white")
 
             shadowText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1], difficulties[difficulty], textH*0.75, "black")
             fillText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1], difficulties[difficulty], textH*0.75, "white")
@@ -117,8 +180,13 @@ const drawTexts = function(){
         }else{
             shadowText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*3, "SCORE", textH*0.75, "black")
             fillText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*3, "SCORE", textH*0.75, "white")
-            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*2, score[difficulty].toString(), textH*0.75, "black")
-            fillText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*2, score[difficulty].toString(), textH*0.75, "white")
+            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*2, score.toString(), textH*0.75, "black")
+            fillText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*2, score.toString(), textH*0.75, "white")
+
+            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]+textH, "GOLD", textH*0.75, "black")
+            fillText(gameRec[2]/13+gameRec[0], gameCent[1]+textH, "GOLD", textH*0.75, "white")
+            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]+textH*2, gold.toString(), textH*0.75, "black")
+            fillText(gameRec[2]/13+gameRec[0], gameCent[1]+textH*2, gold.toString(), textH*0.75, "white")
 
             shadowText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, difficulties[difficulty], textH*0.75, "black")
             fillText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, difficulties[difficulty], textH*0.75, "white")
@@ -149,7 +217,17 @@ const checkRelease = function(){
         //     soundPlayed = false
         // justScored = true
         if(selected[0]>-1){
-            gameGrid[selected[0]][selected[1]].isSelected = false;
+            var sPiece = gameGrid[selected[0]][selected[1]]
+            if(arrEq(selected, target)&&!(sPiece.type == "path")&&waveRunning){
+                var cost= 20;
+                if(gold>=cost){
+                    sPiece.type = "defense"
+                    gold-= cost;
+                    theDefences.push(sPiece)
+                }
+                
+            }
+            sPiece.isSelected = false;
             selected = [-1,-1]
         }
         
@@ -163,7 +241,7 @@ const checkRelease = function(){
 const doNew = function(){
     
     if (confirm('This will erase your score for the current game type. Are you sure?')) {
-        score[difficulty] = 0;
+        score = 0;
         genGrid()
     }
 }
@@ -211,23 +289,144 @@ const click = function(){
 class Piece {
     constructor(i, j, type) {
         this.type = type
-        this.color = [10,10,10]
+        this.color = [40,40,40]
         this.left = 0;
         this.top = 0;
         this.px = i;
         this.py = j;
         this.isSelected = false;
         this.isTarget = false;
+        this.health = 100;
+        this.enemyNum = -1;
+        this.range = 4;
         this.draw = () => {
             
-            this.color = (this.type=="base")? [0,0,123] : (this.type=="defense")? [123,0,0] : (this.type=="path")? [123, 123, 123]  : this.color
+            this.color = (this.type=="base")? [0,0,123] : (this.type=="defense")? [160,160,160] : (this.type=="path")? [123, 123, 123]  : this.color
             var col = this.isSelected? [0,123,0] : this.isTarget? [123,123,0] : this.color
             
             fillRec([this.left, this.top, pieceSize, pieceSize], colText(col));
+            
+            if(this.type == "base" || this.type == "defense"){
+            fillRec([this.left, this.top+pieceSize*0.9, pieceSize, pieceSize*0.1], colText([123,255,0]))
+
+            }
         }
         this.isOver = (xx, yy)=>{
             return (((xx >= this.left)&&(xx <= (this.left+pieceSize)))&&((yy >= this.top)&&(yy <= (this.top+pieceSize))))
         }
+        this.drawLaser = ()=>{
+            //todo find nearest enemy and qualify
+            //todo draw line to enemy
+            this.enemy = -1
+            var tar = []
+            var sor = [this.left+pieceSize/2, this.top + pieceSize/2]
+            var tarPind = 100000
+
+            for(var ei=activeEnemies - 1; ei>=0; ei--){
+                var tartar = [theEnemies[ei].left+pieceSize/4, theEnemies[ei].top + pieceSize/4]
+                var dis = dist(sor,tartar)
+                if(dis <= this.range*pieceSize){
+                    //enemy found
+
+                    if(tarPind > theEnemies[ei].pathStep){
+                        this.enemy = ei
+                        tar = [...tartar]
+                    }
+                    
+                }
+            }
+
+            if(this.enemy > -1){
+                drawLine(sor,tar,3,colText([0,200,200]))
+            }
+        }
+    }
+}
+
+class Enemy {
+    constructor(type, pathnum){
+        this.type = type
+        this.color = [123,0,0]
+        this.speed = 0.1;
+        this.left = 50;
+        this.top = 50;
+        this.from = [-1,-1]
+        this.to  = [-1,-1]
+        this.health = 100;
+        this.pathNum = pathnum;
+        console.log(paths)
+        console.log(pathnum)
+        this.pathStep = paths[pathnum].length -1
+        this.visible = false;
+        this.draw = ()=>{
+            if((this.to[0]<0)||(this.from[0]<0)){
+                if(this.visible){
+                    this.visible = false
+                }
+            }else{
+                this.visible = true;
+            }
+
+            if(this.visible){
+                fillRec([this.left, this.top, pieceSize/2, pieceSize/2], colText(this.color));
+                fillRec([this.left, this.top+pieceSize/2*0.9, pieceSize/2, pieceSize/2*0.1], colText([123,255,0]))
+            }
+
+        }
+        this.move = ()=>{
+            var dir = [ this.to[0]-this.from[0] , this.to[1] - this.from[1]  ]
+            var spDir = dir
+            if(verticalOrien){
+                spDir = [ -spDir[1], spDir[0]]
+            }
+
+            this.left= this.left + this.speed*spDir[0]*pieceSize
+            this.top= this.top + this.speed*spDir[1]*pieceSize
+
+            if(this.to[0]>-1){
+                var destPiece = gameGrid[this.to[0]][this.to[1]]
+                var pastLeft = spDir[0]*((destPiece.left + pieceSize/2) - (this.left + pieceSize/4)) <= 0
+                var pastTop = spDir[1]*((destPiece.top + pieceSize/2) - (this.top + pieceSize/4)) <= 0
+
+                if(pastLeft){
+                    this.left = destPiece.left + pieceSize/4
+                }
+                if(pastTop){
+                    this.top = destPiece.top + pieceSize/4
+                }
+
+                if(pastLeft&&pastTop){
+        
+                    this.pathStep = this.pathStep - 1;
+                    if(this.pathStep < - 0){
+                        //hit base
+                        
+                        this.destroy()
+                    }else{
+                        
+                        this.from = [...this.to]
+                        this.to = [...paths[this.pathNum][this.pathStep]]
+                    }
+                    
+                }
+                // console.log('moving', dir, this.speed, this.left, this.top)
+            }
+            
+        }
+        this.destroy = ()=>{
+            this.speed = 0;
+            this.to = [-1,-1]
+            this.from = [-1,-1]
+            this.left = 0;
+            this.top = 0;
+            activeEnemies--
+            theEnemies.splice(theEnemies.indexOf(this),1)
+            console.log("enemy removed", theEnemies)
+            if(theEnemies.length == 0){
+                waveRunning = false
+            }
+        }
+
     }
 }
 
@@ -295,21 +494,16 @@ const genGrid = function(){
 
     console.log("paths",paths)
 
-    genGoal()
+    genEnemies()
     saveGame()
 }
 
-var goalAttempts = 0;
-const maxGoalAttempts = 10;
 
-const genGoal = function(){
-    goalAttempts++
+const genEnemies = function(){
+    for(var i=0; i<numEnemies; i++){
+        var newEn = new Enemy("grunt",floor(random()*numPaths))
+        theEnemies.push(newEn)
 
-    if(goalAttempts > maxGoalAttempts){
-        goalAttempts = 0
-        console.error('MAX GOAL ATTEMPTS REACHED, NEW GRID')
-        genGrid()
-        return
     }
 
     
