@@ -7,7 +7,6 @@ var pop_low = document.getElementById('pop_low')
 var pop_mid = document.getElementById('pop_mid')
 var pop_high = document.getElementById('pop_high')
 
-
 var AudioContext = (window.AudioContext || 
     window.webkitAudioContext || 
     window.mozAudioContext || 
@@ -25,5 +24,7 @@ if (AudioContext) {
     pop_low_source.connect(audioContext.destination);
     pop_mid_source.connect(audioContext.destination);
     pop_high_source.connect(audioContext.destination);
+
+    
 }
 

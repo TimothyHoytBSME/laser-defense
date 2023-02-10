@@ -69,10 +69,12 @@ var rat = 16/9;
 var un_mute = document.getElementById('un-mute');
 var muteimages = document.getElementsByClassName('muteimage')
 
+// var oscillator;
 
 un_mute.onclick = function() {
     console.log('toggling sound')
     if(AudioContext){
+
         console.log('audiocontext detected')
         if (audioContext.state === "suspended") {
             console.log('enabling audio')
@@ -80,9 +82,21 @@ un_mute.onclick = function() {
         }
         if(!audioAllowed){
             audioAllowed = true;
-            pop_high.play()
+            // pop_high.play()
+            
+            // oscillator = audioContext.createOscillator();
+
+            // // oscillator.type = 'custom'; //"sine", "square", "sawtooth", "triangle" and "custom" for periodicWave
+            // var imag= new Float32Array([0,1,0,1,0]);   // sine
+            // var real = new Float32Array([1,0,1,0,1]);  // cos
+            // var customWave = audioContext.createPeriodicWave(real, imag);  // cos,sine
+            // oscillator.setPeriodicWave(customWave);
+            // // oscillator.frequency.setValueAtTime(300, audioContext.currentTime); // value in hertz
+            // oscillator.connect(audioContext.destination);
+            // oscillator.start()
         }else{
             audioAllowed = false;
+            // oscillator.stop()
         }
     }
 };

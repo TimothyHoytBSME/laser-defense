@@ -36,6 +36,7 @@ var activeEnemies = 0;
 var theDefences = [];
 var waveRunning = true;
 var theBase = {}
+var gameOver = false;
 
 //Main Animation Loop
 const mainLoop = function(){
@@ -198,6 +199,14 @@ const drawTexts = function(){
         ctx.textAlign = "left"
         ctx.textBaseline = 'bottom'
         
+        if(gameOver){
+            fillRec([gridPos[0]+gridSizePix[0]/4, gridPos[1]+gridSizePix[1]/4, gridSizePix[0]/2, gridSizePix[1]/2],colText([0,0,0]))
+            ctx.textAlign = "center"
+            ctx.textBaseline = 'middle'
+            fillText(gameCent[0], gameCent[1], "GAME OVER", textH*0.75, "white")
+            ctx.textAlign = "left"
+            ctx.textBaseline = 'bottom'
+        }
     }else{
         //paused
         returnBox = [gameRec[0]+gameRec[2]-textXoff*5-textW, gameRec[1]+gameRec[3]-textH, textW*2, textH]
@@ -426,6 +435,7 @@ class Enemy {
                         }else{
                             theBase.health = 0
                             waveRunning = false;
+                            gameOver = true;
 
                         }
 
