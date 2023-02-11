@@ -27,7 +27,7 @@ const degAtan2 = function(P1, P2){
 }
 
 const dist = function(a,b){
-    return sqrt((b[0]-a[0])**2 + (b[1]-a[1])**2)
+    return sqrt(abs(b[0]-a[0])**2 + abs(b[1]-a[1])**2)
 }
 
 const avg = function(a,b){
@@ -163,6 +163,10 @@ const colText = function(col){
 }
 
 const fillCir = function (cir,c){ctx.beginPath(); ctx.arc(cir[0], cir[1], cir[2], 0, 2 * Math.PI, false);ctx.fillStyle = c;  ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(0,0,0,0)';  ctx.stroke();}
+
+const strokeCir = function(cir,w,c){
+    ctx.beginPath(); ctx.arc(cir[0], cir[1], cir[2], 0, 2 * Math.PI, false);ctx.strokeStyle = c; ctx.lineWidth = w; ctx.stroke();
+}
 
 const fillGradCir = function(cir,inner, outer, c1,c2){
     var gradient = ctx.createRadialGradient(cir[0], cir[1], inner, cir[0], cir[1], outer);

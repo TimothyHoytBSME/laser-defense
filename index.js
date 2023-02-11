@@ -392,6 +392,7 @@ const click = function(){
                             }else if(options[i] == "slow"){
                                 choosingFor.type = "defense"
                                 choosingFor.subtype = "slow"
+                                choosingFor.numLasers = 3;
                                 choosingFor.cost = thePrice
                                 theDefences.push(choosingFor)
                             }
@@ -448,8 +449,9 @@ class Piece {
         this.isSelected = false;
         this.isTarget = false;
         this.health = 100;
-        this.enemyNum = -1;
+        this.enemies = new Array([-1]);
         this.range = 4;
+        this.numLasers = 1;
         this.damage = 0.25;
         this.level = 1;
 
@@ -462,59 +464,79 @@ class Piece {
             
             if(this.type == "base"){
                 fillRec([this.left, this.top+pieceSize*0.9, pieceSize*this.health/100, pieceSize*0.1], colText([123,255,0]))
+                // strokeCir([this.left+pieceSize/2, this.top+pieceSize/2, pieceSize*this.range], 3, colText(col))
 
             }
             if(this.type == "defense"){
                 var col = (this.subtype == "basic")? [100,100,0] : (this.subtype == "slow")? [0,100,100] : [255,255,255]
-                    fillCir([this.left+pieceSize/2, this.top+pieceSize/2, pieceSize*0.75/2], colText(col))
+                fillCir([this.left+pieceSize/2, this.top+pieceSize/2, pieceSize*0.75/2], colText(col))
+                // strokeCir([this.left+pieceSize/2, this.top+pieceSize/2, pieceSize*this.range], 3, colText(col))
             }
         }
         this.drawLaser = ()=>{
             //todo find nearest enemy and qualify
             //todo draw line to enemy
-            this.enemy = -1
-            var tar = []
+            this.enemies = new Array([-1])
+
+            
             var sor = [this.left+pieceSize/2, this.top + pieceSize/2]
-            var tarPind = 100000
+            
+            for(var li = 0; li<this.numLasers; li++){
+                var tarPind = 1000000
+                var closest = 1000000;
+                for(var ei=(activeEnemies - 1); ei>=0; ei--){
+                    if(!this.enemies.includes(ei)){
+                        var tartar = [theEnemies[ei].left+pieceSize/4, theEnemies[ei].top + pieceSize/4]
+                        var dis = dist(sor,tartar)
+                        
+                        if(dis <= this.range*pieceSize){
+                            //enemy found
+                            if(this.subtype == "slow"){
+                                if(dis<closest){
+                                    closest = dis
+                                    this.enemies[li] = ei
+                                    console.log(dis, this.range, pieceSize)
 
-            for(var ei=activeEnemies - 1; ei>=0; ei--){
-                var tartar = [theEnemies[ei].left+pieceSize/4, theEnemies[ei].top + pieceSize/4]
-                var dis = dist(sor,tartar)
-                if(dis <= this.range*pieceSize){
-                    //enemy found
-
-                    if(tarPind > theEnemies[ei].pathStep){
-                        this.enemy = ei
-                        tar = [...tartar]
+                                }
+                            }else{
+                                if(tarPind > theEnemies[ei].pathStep){
+                                    this.enemies[li] = ei
+                                }
+                            }
+                        }
                     }
-                    
                 }
             }
+            
+            if(this.enemies[0] > -1){
 
-            if(this.enemy > -1){
-                var sz = 3; var co = [200,180,0,0.8]
-                if(this.type == "base"){
-                    sz = 5; co = [200,123,50,0.8]
-                }
-                if(this.subtype == "slow"){
-                    co = [0,200,200,0.8]
-                }
-                drawLine(sor,tar,sz,colText(co))
-                var theenemy = theEnemies[this.enemy]
-                
-                if(this.subtype == "basic"){
-                    if(theenemy.health > this.damage){
-                        theenemy.health-=this.damage
-                    }else{
-                        theenemy.health = 0
-                        theenemy.destroy()
-                        score+=theenemy.reward
-                        gold+=theenemy.reward
-                        this.enemy = -1;
+                for(var ei=0; ei<this.enemies.length; ei++){
+                    var theenemy = theEnemies[this.enemies[ei]]
+                    var tar = [theenemy.left+pieceSize/4, theenemy.top + pieceSize/4]
+                    var sz = 3; var co = [200,180,0,0.8]
+                    if(this.type == "base"){
+                        sz = 5; co = [200,123,50,0.8]
                     }
-                }else if(this.subtype == "slow"){
-                    theenemy.speedMod *=0.5;
+                    if(this.subtype == "slow"){
+                        co = [0,200,200,0.8]
+                    }
+                    drawLine(sor,tar,sz,colText(co))
+                    
+                    if(this.subtype == "basic"){
+                        if(theenemy.health > this.damage){
+                            theenemy.health-=this.damage
+                        }else{
+                            theenemy.health = 0
+                            theenemy.destroy()
+                            score+=theenemy.reward
+                            gold+=theenemy.reward
+                            this.enemies[0] = -1;
+                        }
+                    }else if(this.subtype == "slow"){
+                        theenemy.speedMod *=0.25;
+                    }
                 }
+                
                 
 
             }
@@ -818,7 +840,6 @@ const drawTexts = function(){
                 fillText(opRec[0]+opRec[2]/2, opRec[1], optionText, textH*0.5, "white")
 
                 prices[i] = 20;
-                var optionText2 = prices[i].toString() + " G"
                 if(options[i]=="repair"){
                     prices[i] = 100;
                     var maxPrice = prices[i]
@@ -826,8 +847,11 @@ const drawTexts = function(){
                     maxPrice = ceil(maxPrice )
                     if(maxPrice > gold){maxPrice = gold}
                     prices[i] = maxPrice
-                    optionText2 = maxPrice.toString() + " G"
+                }else if(options[i]=="slow"){
+                    prices[i] = prices[i]/4
                 }
+                var optionText2 = prices[i].toString() + " G"
+
                 fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/8, optionText2, textH*0.5, "white")
 
                 if(chTyp == "empty"){
