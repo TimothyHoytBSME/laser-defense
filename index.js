@@ -198,9 +198,9 @@ const drawPopup = function(){
         if(choosingFor.type =="empty"){
             options = [...subtypes]
         }else if(choosingFor.type == "base"){
-            options = ["upgrade", "repair"]
+            options = ["upgrade1", "upgrade2", "upgrade3", "repair"]
         }else if(choosingFor.type == "defense"){
-            options = ["upgrade"]
+            options = ["upgrade1", "upgrade2", "upgrade3"]
             for(var i=0; i<subtypes.length; i++){
                 if(subtypes[i] != choosingFor.subtype){
                     options.push(subtypes[i])
@@ -857,6 +857,7 @@ const drawTexts = function(){
                 var optionText = "BUILD " + options[i].toUpperCase()
                 if(chTyp == "base"){
                     optionText = options[i].toUpperCase()
+                    
                 }else if(chTyp == "defense"){
                     if(options[i] == "upgrade"){
                         optionText = options[i].toUpperCase()
@@ -864,6 +865,10 @@ const drawTexts = function(){
                         optionText = "CHANGE"
                     }
                 }
+                if(options[i] == "upgrade1" || options[i] == "upgrade2" || options[i] == "upgrade3"){
+                    optionText = ""
+                }
+                
                 fillText(opRec[0]+opRec[2]/2, opRec[1], optionText, textH*0.5, "white")
 
                 prices[i] = 20;
@@ -881,15 +886,12 @@ const drawTexts = function(){
 
                 fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/8, optionText2, textH*0.5, "white")
 
-                if(chTyp == "empty"){
-                    var col = (options[i] == "basic")? [100,100,0,popUpAlpha] : (options[i] == "slow")? [0,100,100,popUpAlpha] : [255,255,255]
-                    fillRec([opRec[0]+opRec[2]/4, opRec[1]+opRec[3]/2-opRec[2]/4, opRec[2]/2,opRec[2]/2],colText([50,50,50,popUpAlpha]))
-                    fillCir([opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/2, opRec[2]/6], colText(col))
+                if(options[i] == "repair"){
+                    fillText(opRec[0]+opRec[2]/3, opRec[1]+opRec[3]/1.75,"+",textH*3,"red")
+                    fillText(opRec[0]+opRec[2]/1.35, opRec[1]+opRec[3]/1.9, prices[i].toString(),textH, "red")
                 }
                 
             }
-
-            //todo sell/cancel
 
             var sellText = "SELL (" + floor((choosingFor.cost/2)).toString() + " G)"
             if(chTyp != "defense"){
