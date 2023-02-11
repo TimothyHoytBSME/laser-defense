@@ -29,7 +29,8 @@ var gridSizePix = [1,1] //gets calculated
 var gridPos = [10,10] //gets calculated
 var numPaths = 2;
 var paths = new Array(numPaths).fill([]); //gets calculated
-var gold = 120;
+var startGold = 80  ;
+var gold = startGold;
 var numEnemies = 100;
 var theEnemies = [];   //gets calculated
 var enemyDelay = 50;
@@ -262,7 +263,7 @@ const doNew = function(){
     if (confirm('This will erase your score for the current game type. Are you sure?')) {
         console.log('clicked okay')
         score = 0;
-        gold = 600;
+        gold = startGold;
         theDefences = [];
         theEnemies = [];
         activeEnemies = []
@@ -272,7 +273,9 @@ const doNew = function(){
         waveRunning = true; 
         theBase = {};    //gets calculated
         gameOver = false; 
-
+        choosing = false;
+        choosingFor = null
+        options=[]
         theGrid = []
         console.log("gamecleared")
         genGrid()
@@ -329,14 +332,14 @@ const click = function(){
             }
         }else{
 
-            if(isInside([mdX,mdY],cancelButtonRec)){
+            if(isInside([mdX,mdY],cancelButtonRec)||(!isInside([mdX,mdY],popUpRec)&&!isInside([mdX,mdY],menuButtonRec))){
                 choosing = false;
                 choosingFor = null
                 console.log('cancel clicked')
                 options=[]
                 waveRunning = true;
             }
-            if(isInside([mdX,mdY],sellButtonRec)){
+            if(isInside([mdX,mdY],sellButtonRec)&&(choosingFor.type == "defense")){
                 choosing = false;
                 console.log('sell clicked')
                 gold+=choosingFor.cost/2;
@@ -412,7 +415,7 @@ class Piece {
 
         this.draw = () => {
             
-            this.color = (this.type=="base")? [0,0,123] : (this.type=="defense")? [160,160,160] : (this.type=="path")? [123, 123, 123]  : [40,40,40]
+            this.color = (this.type=="base")? [126*(1-this.health/100),0,123*this.health/100] : (this.type=="defense")? [160,160,160] : (this.type=="path")? [123, 123, 123]  : [40,40,40]
             var col = this.isSelected? [0,123,0] : this.isTarget? [123,123,0] : this.color
             
             fillRec([this.left, this.top, pieceSize, pieceSize], colText(col));
@@ -465,7 +468,8 @@ class Piece {
                     }else{
                         theenemy.health = 0
                         theenemy.destroy()
-                        score++
+                        score+=theenemy.reward
+                        gold+=theenemy.reward
                         this.enemy = -1;
                     }
                 }else if(this.subtype == "slow"){
@@ -490,6 +494,7 @@ class Enemy {
         this.health = 100;
         this.damage = 10;
         this.pathNum = pathnum;
+        this.reward = 1;
         // console.log(paths)
         // console.log(pathnum)
         this.pathStep = paths[pathnum].length -1
@@ -571,7 +576,11 @@ class Enemy {
             theEnemies.splice(theEnemies.indexOf(this),1)
             // console.log("enemy removed", theEnemies)
             if(theEnemies.length == 0){
-                waveRunning = false
+                waveNum++
+                genEnemies()
+                eDelayCount = 0
+                sDelayCount = 0;
+                
             }
         }
 
@@ -697,8 +706,15 @@ const drawTexts = function(){
             shadowText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1]+textH, score.toString(), textH*0.75, "black")
             fillText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1]+textH, score.toString(), textH*0.75, "white")
 
-            shadowText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1], "WAVE #", textH*0.75, "black")
-            fillText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1], "WAVE #", textH*0.75, "white")
+            shadowText(gameCent[0], gameRec[3]/10+gameRec[1], "GOLD", textH*0.75, "black")
+            fillText(gameCent[0], gameRec[3]/10+gameRec[1], "GOLD", textH*0.75, "white")
+            shadowText(gameCent[0], gameRec[3]/10+gameRec[1]+textH, gold.toString(), textH*0.75, "black")
+            fillText(gameCent[0], gameRec[3]/10+gameRec[1]+textH, gold.toString(), textH*0.75, "white")
+
+            shadowText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1], "WAVE", textH*0.75, "black")
+            fillText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1], "WAVE", textH*0.75, "white")
+            shadowText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1]+textH, waveNum.toString(), textH*0.75, "black")
+            fillText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1]+textH, waveNum.toString(), textH*0.75, "white")
 
         }else{
             shadowText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*3, "SCORE", textH*0.75, "black")
@@ -711,8 +727,10 @@ const drawTexts = function(){
             shadowText(gameRec[2]/13+gameRec[0], gameCent[1]+textH*2, gold.toString(), textH*0.75, "black")
             fillText(gameRec[2]/13+gameRec[0], gameCent[1]+textH*2, gold.toString(), textH*0.75, "white")
 
-            shadowText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, "WAVE #", textH*0.75, "black")
-            fillText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, "WAVE #", textH*0.75, "white")
+            shadowText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, "WAVE", textH*0.75, "black")
+            fillText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, "WAVE", textH*0.75, "white")
+            shadowText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*2, waveNum.toString(), textH*0.75, "black")
+            fillText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*2, waveNum.toString(), textH*0.75, "white")
         }
         ctx.textAlign = "left"
         ctx.textBaseline = 'bottom'
