@@ -353,17 +353,19 @@ const click = function(){
             for(var i=0; i<options.length; i++){
                 if(isInside([mdX,mdY],optionsRecs[i])){
                     console.log('option '+i.toString()+" clicked")
-                    if(gold >= prices[i]){
+                    var thePrice = prices[i]
+
+                    if(gold >= thePrice){
                         if(choosingFor.type == "empty"){
                             if(options[i] == "basic"){
                                 choosingFor.type = "defense"
                                 choosingFor.subtype = "basic"
-                                choosingFor.cost = prices[i]
+                                choosingFor.cost = thePrice
                                 theDefences.push(choosingFor)
                             }else if(options[i] == "slow"){
                                 choosingFor.type = "defense"
                                 choosingFor.subtype = "slow"
-                                choosingFor.cost = prices[i]
+                                choosingFor.cost = thePrice
                                 theDefences.push(choosingFor)
                             }
                         }else if(choosingFor.type == "defense"){
@@ -376,8 +378,15 @@ const click = function(){
                                 //todo change type
                                 choosingFor.subtype = "basic"
                             }
+                        }else if(choosingFor.type == "base"){
+                            if(options[i] == "repair"){
+                                console.log('repairing base')
+                                
+                                theBase.health+= thePrice
+                                
+                            }
                         }
-                        gold-= prices[i]
+                        gold-= thePrice
                         choosing = false;
                         choosingFor = null;
                         options=[]
@@ -580,7 +589,7 @@ class Enemy {
                 genEnemies()
                 eDelayCount = 0
                 sDelayCount = 0;
-                
+
             }
         }
 
@@ -781,6 +790,15 @@ const drawTexts = function(){
 
                 prices[i] = 20;
                 var optionText2 = prices[i].toString() + " G"
+                if(options[i]=="repair"){
+                    prices[i] = 100;
+                    var maxPrice = prices[i]
+                    maxPrice *= (100-theBase.health)/100
+                    maxPrice = ceil(maxPrice )
+                    if(maxPrice > gold){maxPrice = gold}
+                    prices[i] = maxPrice
+                    optionText2 = maxPrice.toString() + " G"
+                }
                 fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/8, optionText2, textH*0.5, "white")
 
                 if(chTyp == "empty"){
