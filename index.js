@@ -1,5 +1,5 @@
 
-const Version = "1.0-alpha-gamename"
+const Version = "1.0-alpha-laserdefense"
 
 
 var backColor = [20,20,20];
