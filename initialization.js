@@ -3,6 +3,7 @@
 //universal initialization
 ///////////////////
 
+loadGameDataIfAble();
 readWindowSize();
 canvas.id = "theCanvas"; canvas.oncontextmenu = () => {return false;}
 checkVerticalOrien(); sizeCanvas();

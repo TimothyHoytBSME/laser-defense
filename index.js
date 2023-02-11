@@ -15,9 +15,13 @@ var textW = 1;  //gets calculated
 var textH = 10 //gets calculated
 var gameCent = [] //gets calculated
 var gameGrid = [] //gets calculated
-var newBox = [] //gets calculated
-var menuBox = [] //gets calculated
-var returnBox = [] //gets calculated
+var newButtonRec = [] //gets calculated
+var menuButtonRec = [] //gets calculated
+var sellButtonRec = [] //gets calculated
+var cancelButtonRec = [] //gets calculated
+var optionsRecs = [] //gets calculated
+var popUpRec = [] //getscalculated
+var returnButtonRec = [] //gets calculated
 var gameActive = true; //gets calculated
 var score = 0; //gets calculated
 var justScored = false; //gets calculated
@@ -38,6 +42,8 @@ var theBase = {};    //gets calculated
 var gameOver = false;    //gets calculated
 var choosing = false;    //gets calculated
 var choosingFor = null   //gets calculated
+var subtypes = ["basic","slow"]
+var options = [] //gets calculated
 
 //Main Animation Loop
 const mainLoop = function(){
@@ -149,7 +155,7 @@ const drawLasers = function(){
 }
 
 const drawPopup = function(){
-    var popUpRec = []
+    
     if(verticalOrien){
         var ww = gridSizePix[1]*0.75
         var left = gridPos[0]+(gridSizePix[0]-ww)/2
@@ -169,86 +175,42 @@ const drawPopup = function(){
         fillRec(popUpRec,colText([0,0,0,0.75]))
         fillCir([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2,pieceSize*0.5],colText([0,200,0,0.25]))
         fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0],popUpRec[1]],[popUpRec[0],popUpRec[1]+popUpRec[3]/4],colText([0,200,0,0.25]))
+        
+        options = []
+        if(choosingFor.type =="empty"){
+            options = [...subtypes]
+        }else if(choosingFor.type == "base"){
+            options = ["upgrade", "repair"]
+        }else if(choosingFor.type == "defense"){
+            options = ["upgrade"]
+            for(var i=0; i<subtypes.length; i++){
+                if(subtypes[i] != choosingFor.subtype){
+                    options.push(subtypes[i])
+                }
+            }
+        }
+
+
+        sellButtonRec = [popUpRec[0],popUpRec[1]+popUpRec[3]*0.8,popUpRec[2]/2.2, popUpRec[3]*0.2]
+        fillRec(sellButtonRec,colText([100,100,100,0.5]))
+
+        cancelButtonRec = [popUpRec[0]+popUpRec[3]-popUpRec[2]/2.2,popUpRec[1]+popUpRec[3]*0.8,popUpRec[2]/2.2, popUpRec[3]*0.2]
+        fillRec(cancelButtonRec,colText([100,100,100,0.5]))
+
+        optionsRecs = new Array(options.length)
+        for(var i=0; i<options.length; i++){
+            var opwid = popUpRec[2]*(0.75/(options.length))
+            var opleft = popUpRec[0] + popUpRec[2]*(0.25/(options.length+1))*(i+1)+opwid*i
+            
+            optionsRecs[i] = [opleft,popUpRec[1]+popUpRec[3]*0.3,opwid,popUpRec[3]*0.3]
+            fillRec(optionsRecs[i], colText([100,100,100,0.5]))  
+        }
     }
 }
 
 const moveEnemies = function(){
     for(var i=0; i<theEnemies.length; i++){
         theEnemies[i].move()
-    }
-}
-
-const drawTexts = function(){
-    if(verticalOrien){
-        textW = gameRec[2]/5
-    }else{
-        textW = gameRec[3]/5
-    }
-    
-    const textXoff = textW/8
-    textH = textW*0.375
-
-    if(gameActive){
-        
-        newBox = [gameRec[0]+textXoff, gameRec[1]+gameRec[3]-textH, textW, textH]
-        shadowText(newBox[0], newBox[1]+newBox[3], "NEW", newBox[3], "black")
-        fillText(newBox[0], newBox[1]+newBox[3], "NEW", newBox[3], "white")
-
-        menuBox = [gameRec[0]+gameRec[2]-textXoff*2-textW, gameRec[1]+gameRec[3]-textH, textW, textH]
-        shadowText(menuBox[0], menuBox[1]+menuBox[3], "MENU", menuBox[3], "black")
-        fillText(menuBox[0], menuBox[1]+menuBox[3], "MENU", menuBox[3], "white")
-
-        ctx.textAlign = "center"
-        ctx.textBaseline = 'middle'
-        if(verticalOrien){
-            shadowText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1], "SCORE", textH*0.75, "black")
-            fillText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1], "SCORE", textH*0.75, "white")
-            shadowText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1]+textH, score.toString(), textH*0.75, "black")
-            fillText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1]+textH, score.toString(), textH*0.75, "white")
-
-            shadowText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1], "WAVE #", textH*0.75, "black")
-            fillText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1], "WAVE #", textH*0.75, "white")
-
-        }else{
-            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*3, "SCORE", textH*0.75, "black")
-            fillText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*3, "SCORE", textH*0.75, "white")
-            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*2, score.toString(), textH*0.75, "black")
-            fillText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*2, score.toString(), textH*0.75, "white")
-
-            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]+textH, "GOLD", textH*0.75, "black")
-            fillText(gameRec[2]/13+gameRec[0], gameCent[1]+textH, "GOLD", textH*0.75, "white")
-            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]+textH*2, gold.toString(), textH*0.75, "black")
-            fillText(gameRec[2]/13+gameRec[0], gameCent[1]+textH*2, gold.toString(), textH*0.75, "white")
-
-            shadowText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, "WAVE #", textH*0.75, "black")
-            fillText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, "WAVE #", textH*0.75, "white")
-        }
-        ctx.textAlign = "left"
-        ctx.textBaseline = 'bottom'
-        
-        if(gameOver){
-            // fillRec([gridPos[0]+gridSizePix[0]/4, gridPos[1]+gridSizePix[1]/4, gridSizePix[0]/2, gridSizePix[1]/2],colText([0,0,0]))
-            ctx.textAlign = "center"
-            ctx.textBaseline = 'middle'
-            fillText(gameCent[0], gameCent[1], "GAME OVER", textH*0.75, "white")
-            ctx.textAlign = "left"
-            ctx.textBaseline = 'bottom'
-        }
-    }else{
-        //paused
-        returnBox = [gameRec[0]+gameRec[2]-textXoff*5-textW, gameRec[1]+gameRec[3]-textH, textW*2, textH]
-        shadowText(returnBox[0], returnBox[1]+returnBox[3], "RETURN", returnBox[3], "black")
-        fillText(returnBox[0], returnBox[1]+returnBox[3], "RETURN", returnBox[3], "white")
-
-        ctx.textAlign = 'center'
-        var message1 = "Instructions line 1".toUpperCase()
-        shadowText(gameCent[0], gameCent[1]-gameRec[3]/3, message1, textH, "black")
-        fillText(gameCent[0], gameCent[1]-gameRec[3]/3, message1, textH, "white")
-
-        var message2 = "Instructions line 2".toUpperCase()
-        shadowText(gameCent[0], gameCent[1]+textH-gameRec[3]/3, message2, textH, "black")
-        fillText(gameCent[0], gameCent[1]+textH-gameRec[3]/3, message2, textH, "white")
-        ctx.textAlign = 'left'
     }
 }
 
@@ -263,11 +225,6 @@ const checkRelease = function(){
                 choosing = true;
                 choosingFor = sPiece
                 waveRunning = false;
-                // if(gold>=cost){
-                //     sPiece.type = "defense"
-                //     gold-= cost;
-                //     theDefences.push(sPiece)
-                // }
                 
             }
             sPiece.isSelected = false;
@@ -311,13 +268,13 @@ const click = function(){
     if(gameActive){
 
 
-        if((mdX > (newBox[0]))&&(mdY > newBox[1])&&(mdX < (newBox[0]+newBox[2]))&&(mdY<(newBox[1]+newBox[3]))){
+        if((mdX > (newButtonRec[0]))&&(mdY > newButtonRec[1])&&(mdX < (newButtonRec[0]+newButtonRec[2]))&&(mdY<(newButtonRec[1]+newButtonRec[3]))){
             console.log("new clicked")
             doNew()
         }
 
 
-        if((mdX > (menuBox[0]))&&(mdY > menuBox[1])&&(mdX < (menuBox[0]+menuBox[2]))&&(mdY<(menuBox[1]+menuBox[3]))){
+        if((mdX > (menuButtonRec[0]))&&(mdY > menuButtonRec[1])&&(mdX < (menuButtonRec[0]+menuButtonRec[2]))&&(mdY<(menuButtonRec[1]+menuButtonRec[3]))){
             console.log("menu clicked")
             gameActive = false;
             // theMenuDiv.style.visibility = "visible"
@@ -335,12 +292,23 @@ const click = function(){
                     }
                 }
             }
+        }else{
+
+
+            if((mdX > (cancelButtonRec[0]))&&(mdY > cancelButtonRec[1])&&(mdX < (cancelButtonRec[0]+cancelButtonRec[2]))&&(mdY<(cancelButtonRec[1]+cancelButtonRec[3]))){
+                
+                choosing = false;
+                choosingFor = null
+                waveRunning = true;
+            }
+
+
         }
         
 
 
     }else{
-        if((mdX > (returnBox[0]))&(mdY > returnBox[1])&&(mdX < (returnBox[0]+returnBox[2]))&&(mdY<(returnBox[1]+returnBox[3]))){
+        if((mdX > (returnButtonRec[0]))&(mdY > returnButtonRec[1])&&(mdX < (returnButtonRec[0]+returnButtonRec[2]))&&(mdY<(returnButtonRec[1]+returnButtonRec[3]))){
             console.log("return clicked")
             // theMenuDiv.style.visibility = "hidden"
             gameActive = true;
@@ -351,7 +319,7 @@ const click = function(){
 class Piece {
     constructor(i, j, type) {
         this.type = type
-        this.subtype = "none"
+        this.subtype = "basic"
         this.color = [40,40,40]
         this.left = 0;
         this.top = 0;
@@ -605,6 +573,129 @@ const genEnemies = function(){
 
 
 
+
+
+
+
+
+
+const drawTexts = function(){
+    if(verticalOrien){
+        textW = gameRec[2]/5
+    }else{
+        textW = gameRec[3]/5
+    }
+    
+    const textXoff = textW/8
+    textH = textW*0.375
+
+    if(gameActive){
+        
+        newButtonRec = [gameRec[0]+textXoff, gameRec[1]+gameRec[3]-textH, textW, textH]
+        shadowText(newButtonRec[0], newButtonRec[1]+newButtonRec[3], "NEW", newButtonRec[3], "black")
+        fillText(newButtonRec[0], newButtonRec[1]+newButtonRec[3], "NEW", newButtonRec[3], "white")
+
+        menuButtonRec = [gameRec[0]+gameRec[2]-textXoff*2-textW, gameRec[1]+gameRec[3]-textH, textW, textH]
+        shadowText(menuButtonRec[0], menuButtonRec[1]+menuButtonRec[3], "MENU", menuButtonRec[3], "black")
+        fillText(menuButtonRec[0], menuButtonRec[1]+menuButtonRec[3], "MENU", menuButtonRec[3], "white")
+
+        ctx.textAlign = "center"
+        ctx.textBaseline = 'middle'
+        if(verticalOrien){
+            shadowText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1], "SCORE", textH*0.75, "black")
+            fillText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1], "SCORE", textH*0.75, "white")
+            shadowText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1]+textH, score.toString(), textH*0.75, "black")
+            fillText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1]+textH, score.toString(), textH*0.75, "white")
+
+            shadowText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1], "WAVE #", textH*0.75, "black")
+            fillText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1], "WAVE #", textH*0.75, "white")
+
+        }else{
+            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*3, "SCORE", textH*0.75, "black")
+            fillText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*3, "SCORE", textH*0.75, "white")
+            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*2, score.toString(), textH*0.75, "black")
+            fillText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*2, score.toString(), textH*0.75, "white")
+
+            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]+textH, "GOLD", textH*0.75, "black")
+            fillText(gameRec[2]/13+gameRec[0], gameCent[1]+textH, "GOLD", textH*0.75, "white")
+            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]+textH*2, gold.toString(), textH*0.75, "black")
+            fillText(gameRec[2]/13+gameRec[0], gameCent[1]+textH*2, gold.toString(), textH*0.75, "white")
+
+            shadowText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, "WAVE #", textH*0.75, "black")
+            fillText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, "WAVE #", textH*0.75, "white")
+        }
+        ctx.textAlign = "left"
+        ctx.textBaseline = 'bottom'
+        
+        if(gameOver){
+            // fillRec([gridPos[0]+gridSizePix[0]/4, gridPos[1]+gridSizePix[1]/4, gridSizePix[0]/2, gridSizePix[1]/2],colText([0,0,0]))
+            ctx.textAlign = "center"
+            ctx.textBaseline = 'middle'
+            fillText(gameCent[0], gameCent[1], "GAME OVER", textH*0.75, "white")
+            ctx.textAlign = "left"
+            ctx.textBaseline = 'bottom'
+        }
+
+
+        if(choosing){
+            //todo title
+            ctx.textAlign = "center"
+            ctx.textBaseline = 'middle'
+            var title = (choosingFor.type == "empty")? choosingFor.type.toUpperCase() + " SPACE" : choosingFor.subtype.toUpperCase() + " " + choosingFor.type.toUpperCase()
+            if(choosingFor.type == "defense"){
+                title+= " TOWER"
+            }
+            fillText(gameCent[0], popUpRec[1]+textH*0.75, title, textH*0.5, "white")
+            
+
+            //todo stats
+
+            //todo options
+            for(var i=0; i<options.length; i++){
+                var optionText = options[i]
+                fillText(optionsRecs[i][0]+optionsRecs[i][2]/2, optionsRecs[i][1]+optionsRecs[i][3]/2, optionText, textH*0.5, "white")
+                
+            }
+
+            //todo sell/cancel
+            var sellText = "SELL (" + floor((choosingFor.cost/2)).toString() + " G)"
+            if(choosingFor.type != "defense"){
+                sellText = "CANNOT SELL"
+            }
+            fillText(sellButtonRec[0]+sellButtonRec[2]/2, sellButtonRec[1]+sellButtonRec[3]/2, sellText, textH*0.5, "white")
+            fillText(cancelButtonRec[0]+cancelButtonRec[2]/2, cancelButtonRec[1]+cancelButtonRec[3]/2, "EXIT", textH*0.5, "white")
+
+            ctx.textAlign = "left"
+            ctx.textBaseline = 'bottom'
+        }
+
+    }else{
+        //paused
+        returnButtonRec = [gameRec[0]+gameRec[2]-textXoff*5-textW, gameRec[1]+gameRec[3]-textH, textW*2, textH]
+        shadowText(returnButtonRec[0], returnButtonRec[1]+returnButtonRec[3], "RETURN", returnButtonRec[3], "black")
+        fillText(returnButtonRec[0], returnButtonRec[1]+returnButtonRec[3], "RETURN", returnButtonRec[3], "white")
+
+        ctx.textAlign = 'center'
+        var message1 = "Instructions line 1".toUpperCase()
+        shadowText(gameCent[0], gameCent[1]-gameRec[3]/3, message1, textH, "black")
+        fillText(gameCent[0], gameCent[1]-gameRec[3]/3, message1, textH, "white")
+
+        var message2 = "Instructions line 2".toUpperCase()
+        shadowText(gameCent[0], gameCent[1]+textH-gameRec[3]/3, message2, textH, "black")
+        fillText(gameCent[0], gameCent[1]+textH-gameRec[3]/3, message2, textH, "white")
+        ctx.textAlign = 'left'
+    }
+}
+
+
+
+
+
+
+
+
+
+
 const saveGame = function(){
     // const gameObj = {\
     //     "gameGrid": deepClone(gameGrid)
@@ -635,7 +726,6 @@ const loadGameDataIfAble = function(){
     }
 }
 
-loadGameDataIfAble()
 
 
 
