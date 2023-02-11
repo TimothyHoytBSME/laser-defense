@@ -54,6 +54,10 @@ const arrEq = function(a,b){
     return true
 }
 
+const isInside = function(p,r){
+    return  (p[0]>(r[0])) && (p[1]>r[1]) && (p[0]<(r[0]+r[2])) && (p[1]<(r[1]+r[3])) 
+}
+
 const deepClone = function(toClone){
     return JSON.parse(JSON.stringify(toClone))
 }

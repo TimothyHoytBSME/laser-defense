@@ -32,8 +32,10 @@ var paths = new Array(numPaths).fill([]); //gets calculated
 var gold = 1000;
 var numEnemies = 100;
 var theEnemies = [];   //gets calculated
-var enemyDelay = 20;
+var enemyDelay = 50;
+var startDelay = 500; 
 var eDelayCount = 0;    //gets calculated
+var sDelayCount = 0;
 var activeEnemies = 0;   //gets calculated
 var theDefences = [];    //gets calculated
 var waveRunning = true;   //gets calculated
@@ -44,6 +46,8 @@ var choosing = false;    //gets calculated
 var choosingFor = null   //gets calculated
 var subtypes = ["basic","slow"]
 var options = [] //gets calculated
+var prices = [] //gets calculated
+var popUpAlpha = 0.7 
 
 //Main Animation Loop
 const mainLoop = function(){
@@ -115,7 +119,21 @@ const drawBoard = function(){
 }
 
 const activateEnemy = function(){
-    eDelayCount++
+    if(sDelayCount > startDelay){
+        eDelayCount++
+    }else{
+        sDelayCount++
+        ctx.textAlign = "center"
+        ctx.textBaseline = "middle"
+        fillText( gameCent[0], gridPos[1]+textH, "GET READY!", textH/3 , "red")
+        ctx.textAlign = "left"
+        ctx.textBaseline = "bottom"
+
+        var timerRec = [gameCent[0]-gridSizePix[0]/5/2, gridPos[1]+textH*1.5, gridSizePix[0]/5,textH/6 ]
+        fillRec(timerRec,colText([100,100,100]))
+        fillRec([timerRec[0],timerRec[1],timerRec[2]*sDelayCount/startDelay,timerRec[3]],"red")
+    }
+    
     if(eDelayCount>enemyDelay){
         if(activeEnemies < theEnemies.length){
             activeEnemies++
@@ -192,10 +210,10 @@ const drawPopup = function(){
 
 
         sellButtonRec = [popUpRec[0],popUpRec[1]+popUpRec[3]*0.8,popUpRec[2]/2.2, popUpRec[3]*0.2]
-        fillRec(sellButtonRec,colText([100,100,100,0.5]))
+        fillRec(sellButtonRec,colText([100,100,100,popUpAlpha]))
 
         cancelButtonRec = [popUpRec[0]+popUpRec[3]-popUpRec[2]/2.2,popUpRec[1]+popUpRec[3]*0.8,popUpRec[2]/2.2, popUpRec[3]*0.2]
-        fillRec(cancelButtonRec,colText([100,100,100,0.5]))
+        fillRec(cancelButtonRec,colText([100,100,100,popUpAlpha]))
 
         optionsRecs = new Array(options.length)
         for(var i=0; i<options.length; i++){
@@ -203,7 +221,7 @@ const drawPopup = function(){
             var opleft = popUpRec[0] + popUpRec[2]*(0.25/(options.length+1))*(i+1)+opwid*i
             
             optionsRecs[i] = [opleft,popUpRec[1]+popUpRec[3]*0.3,opwid,popUpRec[3]*0.3]
-            fillRec(optionsRecs[i], colText([100,100,100,0.5]))  
+            fillRec(optionsRecs[i], colText([100,100,100,popUpAlpha]))  
         }
     }
 }
@@ -221,8 +239,9 @@ const checkRelease = function(){
         if(selected[0]>-1){
             var sPiece = gameGrid[selected[0]][selected[1]]
             if(arrEq(selected, target)&&!(sPiece.type == "path")&&waveRunning){
-                var cost= 20;
+                
                 choosing = true;
+                console.log("opening options for",sPiece)
                 choosingFor = sPiece
                 waveRunning = false;
                 
@@ -240,10 +259,10 @@ const checkRelease = function(){
 
 const doNew = function(){
     
-    if (confirm('This will erase your score for the current game type. Are you sure?')) {
-        score = 0;
-        genGrid()
-    }
+    // if (confirm('This will erase your score for the current game type. Are you sure?')) {
+    //     score = 0;
+    //     genGrid()
+    // }
 }
 
 const onMoveMouse = function(){
@@ -251,7 +270,7 @@ const onMoveMouse = function(){
         for(var i=0; i<gridDims[0]; i++){
             for(var j=0; j<gridDims[1]; j++){
                 var piece = gameGrid[i][j]
-                if(piece.isOver(mX,mY)){
+                if(isInside([mX,mY],[piece.left,piece.top,pieceSize,pieceSize])){//piece.isOver(mX,mY)){
                     target = [i,j]
                     piece.isTarget = true;
                 }else{
@@ -268,13 +287,13 @@ const click = function(){
     if(gameActive){
 
 
-        if((mdX > (newButtonRec[0]))&&(mdY > newButtonRec[1])&&(mdX < (newButtonRec[0]+newButtonRec[2]))&&(mdY<(newButtonRec[1]+newButtonRec[3]))){
+        if(isInside([mdX,mdY],newButtonRec)){
             console.log("new clicked")
             doNew()
         }
 
 
-        if((mdX > (menuButtonRec[0]))&&(mdY > menuButtonRec[1])&&(mdX < (menuButtonRec[0]+menuButtonRec[2]))&&(mdY<(menuButtonRec[1]+menuButtonRec[3]))){
+        if(isInside([mdX,mdY],menuButtonRec)){
             console.log("menu clicked")
             gameActive = false;
             // theMenuDiv.style.visibility = "visible"
@@ -284,7 +303,7 @@ const click = function(){
             for(var i=0; i<gridDims[0]; i++){
                 for(var j=0; j<gridDims[1]; j++){
                     var piece = gameGrid[i][j]
-                    if(piece.isOver(mdX,mdY)){
+                    if(isInside([mdX,mdY],[piece.left,piece.top,pieceSize,pieceSize])){
                         selected = [i,j]
                         piece.isSelected = true;
                     }else{
@@ -294,23 +313,64 @@ const click = function(){
             }
         }else{
 
-
-            if((mdX > (cancelButtonRec[0]))&&(mdY > cancelButtonRec[1])&&(mdX < (cancelButtonRec[0]+cancelButtonRec[2]))&&(mdY<(cancelButtonRec[1]+cancelButtonRec[3]))){
-                
+            if(isInside([mdX,mdY],cancelButtonRec)){
                 choosing = false;
                 choosingFor = null
+                console.log('cancel clicked')
+                options=[]
                 waveRunning = true;
             }
+            if(isInside([mdX,mdY],sellButtonRec)){
+                choosing = false;
+                console.log('sell clicked')
+                gold+=choosingFor.cost/2;
+                choosingFor.type = "empty"
+                theDefences.splice(theDefences.indexOf(choosingFor),1)
+                choosingFor = null
 
-
+                options=[]
+                waveRunning = true;
+            }
+            for(var i=0; i<options.length; i++){
+                if(isInside([mdX,mdY],optionsRecs[i])){
+                    console.log('option '+i.toString()+" clicked")
+                    if(gold >= prices[i]){
+                        if(choosingFor.type == "empty"){
+                            if(options[i] == "basic"){
+                                choosingFor.type = "defense"
+                                choosingFor.subtype = "basic"
+                                choosingFor.cost = prices[i]
+                                theDefences.push(choosingFor)
+                            }else if(options[i] == "slow"){
+                                choosingFor.type = "defense"
+                                choosingFor.subtype = "slow"
+                                choosingFor.cost = prices[i]
+                                theDefences.push(choosingFor)
+                            }
+                        }else if(choosingFor.type == "defense"){
+                            if(options[i] == "upgrade"){
+                                //todo upgrades...
+                            }else if(options[i] == "slow"){
+                                //todo change type
+                                choosingFor.subtype = "slow"
+                            }else if(options[i] == "basic"){
+                                //todo change type
+                                choosingFor.subtype = "basic"
+                            }
+                        }
+                        gold-= prices[i]
+                        choosing = false;
+                        choosingFor = null;
+                        options=[]
+                        console.log("option "+options[i]+" clicked")
+                        waveRunning = true;
+                    }
+                }
+            }
         }
-        
-
-
     }else{
-        if((mdX > (returnButtonRec[0]))&(mdY > returnButtonRec[1])&&(mdX < (returnButtonRec[0]+returnButtonRec[2]))&&(mdY<(returnButtonRec[1]+returnButtonRec[3]))){
+        if(isInside([mdX,mdY],returnButtonRec)){
             console.log("return clicked")
-            // theMenuDiv.style.visibility = "hidden"
             gameActive = true;
         }
     }
@@ -319,6 +379,7 @@ const click = function(){
 class Piece {
     constructor(i, j, type) {
         this.type = type
+        this.cost = 20
         this.subtype = "basic"
         this.color = [40,40,40]
         this.left = 0;
@@ -335,7 +396,7 @@ class Piece {
 
         this.draw = () => {
             
-            this.color = (this.type=="base")? [0,0,123] : (this.type=="defense")? [160,160,160] : (this.type=="path")? [123, 123, 123]  : this.color
+            this.color = (this.type=="base")? [0,0,123] : (this.type=="defense")? [160,160,160] : (this.type=="path")? [123, 123, 123]  : [40,40,40]
             var col = this.isSelected? [0,123,0] : this.isTarget? [123,123,0] : this.color
             
             fillRec([this.left, this.top, pieceSize, pieceSize], colText(col));
@@ -344,9 +405,10 @@ class Piece {
                 fillRec([this.left, this.top+pieceSize*0.9, pieceSize*this.health/100, pieceSize*0.1], colText([123,255,0]))
 
             }
-        }
-        this.isOver = (xx, yy)=>{
-            return (((xx >= this.left)&&(xx <= (this.left+pieceSize)))&&((yy >= this.top)&&(yy <= (this.top+pieceSize))))
+            if(this.type == "defense"){
+                var col = (this.subtype == "basic")? [100,100,0] : (this.subtype == "slow")? [0,100,100] : [255,255,255]
+                    fillCir([this.left+pieceSize/2, this.top+pieceSize/2, pieceSize*0.75/2], colText(col))
+            }
         }
         this.drawLaser = ()=>{
             //todo find nearest enemy and qualify
@@ -371,19 +433,27 @@ class Piece {
             }
 
             if(this.enemy > -1){
-                var sz = 3; var co = [0,200,200]
+                var sz = 3; var co = [200,180,0,0.8]
                 if(this.type == "base"){
-                    sz = 5; co = [200,123,50]
+                    sz = 5; co = [200,123,50,0.8]
+                }
+                if(this.subtype == "slow"){
+                    co = [0,200,200,0.8]
                 }
                 drawLine(sor,tar,sz,colText(co))
                 var theenemy = theEnemies[this.enemy]
-                if(theenemy.health > this.damage){
-                    theenemy.health-=this.damage
-                }else{
-                    theenemy.health = 0
-                    theenemy.destroy()
-                    score++
-                    this.enemy = -1;
+                
+                if(this.subtype == "basic"){
+                    if(theenemy.health > this.damage){
+                        theenemy.health-=this.damage
+                    }else{
+                        theenemy.health = 0
+                        theenemy.destroy()
+                        score++
+                        this.enemy = -1;
+                    }
+                }else if(this.subtype == "slow"){
+                    theenemy.speedMod = 0.25;
                 }
                 
 
@@ -408,6 +478,8 @@ class Enemy {
         // console.log(pathnum)
         this.pathStep = paths[pathnum].length -1
         this.visible = false;
+        this.speedMod = 1;
+
         this.draw = ()=>{
             if((this.to[0]<0)||(this.from[0]<0)){
                 if(this.visible){
@@ -430,8 +502,9 @@ class Enemy {
                 spDir = [ -spDir[1], spDir[0]]
             }
 
-            this.left= this.left + this.speed*spDir[0]*pieceSize
-            this.top= this.top + this.speed*spDir[1]*pieceSize
+            this.left= this.left + this.speed*spDir[0]*pieceSize*this.speedMod
+            this.top= this.top + this.speed*spDir[1]*pieceSize*this.speedMod
+            this.speedMod = 1;
 
             if(this.to[0]>-1){
                 var destPiece = gameGrid[this.to[0]][this.to[1]]
@@ -641,8 +714,10 @@ const drawTexts = function(){
             //todo title
             ctx.textAlign = "center"
             ctx.textBaseline = 'middle'
-            var title = (choosingFor.type == "empty")? choosingFor.type.toUpperCase() + " SPACE" : choosingFor.subtype.toUpperCase() + " " + choosingFor.type.toUpperCase()
-            if(choosingFor.type == "defense"){
+            var chTyp = choosingFor.type
+            var chSubT = choosingFor.subtype
+            var title = (chTyp == "empty")? chTyp.toUpperCase() + " SPACE" : (chTyp == "base")? "YOUR BASE" : chSubT.toUpperCase() + " " + chTyp.toUpperCase()
+            if(chTyp == "defense"){
                 title+= " TOWER"
             }
             fillText(gameCent[0], popUpRec[1]+textH*0.75, title, textH*0.5, "white")
@@ -652,14 +727,39 @@ const drawTexts = function(){
 
             //todo options
             for(var i=0; i<options.length; i++){
-                var optionText = options[i]
-                fillText(optionsRecs[i][0]+optionsRecs[i][2]/2, optionsRecs[i][1]+optionsRecs[i][3]/2, optionText, textH*0.5, "white")
+                var opRec = optionsRecs[i]
+                var optionText = "BUILD " + options[i].toUpperCase()
+                if(chTyp == "base"){
+                    optionText = options[i].toUpperCase()
+                }else if(chTyp == "defense"){
+                    if(options[i] == "upgrade"){
+                        optionText = options[i].toUpperCase()
+                    }else{
+                        optionText = "CHANGE" //options[i].toUpperCase()
+                        // fillText(opRec[0]+opRec[2]/2, opRec[1]-textH*0.5, "CHANGE TO", textH*0.5, "white")
+                        var col = (options[i] == "basic")? [100,100,0,popUpAlpha] : (options[i] == "slow")? [0,100,100,popUpAlpha] : [255,255,255]
+                        fillRec([opRec[0]+opRec[2]/4, opRec[1]+opRec[3]/2-opRec[2]/4, opRec[2]/2,opRec[2]/2],colText([50,50,50,popUpAlpha]))
+                        fillCir([opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/2, opRec[2]/6], colText(col))
+                    }
+                }
+                fillText(opRec[0]+opRec[2]/2, opRec[1], optionText, textH*0.5, "white")
+
+                prices[i] = 20;
+                var optionText2 = prices[i].toString() + " G"
+                fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/8, optionText2, textH*0.5, "white")
+
+                if(chTyp == "empty"){
+                    var col = (options[i] == "basic")? [100,100,0,popUpAlpha] : (options[i] == "slow")? [0,100,100,popUpAlpha] : [255,255,255]
+                    fillRec([opRec[0]+opRec[2]/4, opRec[1]+opRec[3]/2-opRec[2]/4, opRec[2]/2,opRec[2]/2],colText([50,50,50,popUpAlpha]))
+                    fillCir([opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/2, opRec[2]/6], colText(col))
+                }
                 
             }
 
             //todo sell/cancel
+
             var sellText = "SELL (" + floor((choosingFor.cost/2)).toString() + " G)"
-            if(choosingFor.type != "defense"){
+            if(chTyp != "defense"){
                 sellText = "CANNOT SELL"
             }
             fillText(sellButtonRec[0]+sellButtonRec[2]/2, sellButtonRec[1]+sellButtonRec[3]/2, sellText, textH*0.5, "white")
