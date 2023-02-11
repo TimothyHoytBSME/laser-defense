@@ -220,7 +220,7 @@ const drawPopup = function(){
             var opwid = popUpRec[2]*(0.75/(options.length))
             var opleft = popUpRec[0] + popUpRec[2]*(0.25/(options.length+1))*(i+1)+opwid*i
             
-            optionsRecs[i] = [opleft,popUpRec[1]+popUpRec[3]*0.3,opwid,popUpRec[3]*0.3]
+            optionsRecs[i] = [opleft,popUpRec[1]+popUpRec[3]*0.35,opwid,popUpRec[3]*0.3]
             var opRec = optionsRecs[i]
             fillRec(opRec, colText([100,100,100,popUpAlpha])) 
 
@@ -495,7 +495,7 @@ class Piece {
                                 if(dis<closest){
                                     closest = dis
                                     this.enemies[li] = ei
-                                    console.log(dis, this.range, pieceSize)
+                                    // console.log(dis, this.range, pieceSize)
 
                                 }
                             }else{
@@ -533,7 +533,7 @@ class Piece {
                             this.enemies[0] = -1;
                         }
                     }else if(this.subtype == "slow"){
-                        theenemy.speedMod *=0.25;
+                        theenemy.speedMod *=this.damage;
                     }
                 }
                 
@@ -808,7 +808,6 @@ const drawTexts = function(){
 
 
         if(choosing){
-            //todo title
             ctx.textAlign = "center"
             ctx.textBaseline = 'middle'
             var chTyp = choosingFor.type
@@ -822,7 +821,37 @@ const drawTexts = function(){
 
             //todo stats
 
-            //todo options
+            //numLasers
+            var numLText = choosingFor.numLasers.toString()
+            
+            //power
+            var powText = choosingFor.damage.toString()
+
+            //range
+            var ranText = choosingFor.range.toString()
+
+            var top1 = popUpRec[1] + textH*2;
+            var top2 = popUpRec[1] + textH*2.5;
+            var leftInc = popUpRec[2]/4;
+            var tsize = textH/2;
+
+            if(chTyp == "base"){
+                leftInc = popUpRec[2]/5;
+                //health
+                fillText(popUpRec[0] + leftInc*4,top1,"HEALTH",tsize,"white")
+                fillText(popUpRec[0] + leftInc*4,top2, floor(choosingFor.health).toString(),tsize,"white")
+            }
+
+            fillText(popUpRec[0] + leftInc,top1, "LASERS" ,tsize, "white")
+            fillText(popUpRec[0] + leftInc,top2, numLText,tsize, "white")
+
+            fillText(popUpRec[0] + leftInc*2,top1, "POWER",tsize, "white")
+            fillText(popUpRec[0] + leftInc*2,top2, powText,tsize, "white")
+            
+            fillText(popUpRec[0] + leftInc*3,top1, "RANGE",tsize, "white")
+            fillText(popUpRec[0] + leftInc*3,top2,ranText ,tsize, "white")
+
+
             for(var i=0; i<options.length; i++){
                 var opRec = optionsRecs[i]
                 var optionText = "BUILD " + options[i].toUpperCase()
@@ -832,9 +861,7 @@ const drawTexts = function(){
                     if(options[i] == "upgrade"){
                         optionText = options[i].toUpperCase()
                     }else{
-                        optionText = "CHANGE" //options[i].toUpperCase()
-                        // fillText(opRec[0]+opRec[2]/2, opRec[1]-textH*0.5, "CHANGE TO", textH*0.5, "white")
-                        
+                        optionText = "CHANGE"
                     }
                 }
                 fillText(opRec[0]+opRec[2]/2, opRec[1], optionText, textH*0.5, "white")
