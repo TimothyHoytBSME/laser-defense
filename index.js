@@ -29,7 +29,7 @@ var gridSizePix = [1,1] //gets calculated
 var gridPos = [10,10] //gets calculated
 var numPaths = 2;
 var paths = new Array(numPaths).fill([]); //gets calculated
-var startGold = 80  ;
+var startGold = 40  ;
 var gold = startGold;
 var numEnemies = 100;
 var theEnemies = [];   //gets calculated
@@ -193,7 +193,11 @@ const drawPopup = function(){
     if(choosing){
         fillRec(popUpRec,colText([0,0,0,0.75]))
         fillCir([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2,pieceSize*0.5],colText([0,200,0,0.25]))
-        fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0],popUpRec[1]],[popUpRec[0],popUpRec[1]+popUpRec[3]/4],colText([0,200,0,0.25]))
+        if((choosingFor.left+pieceSize/2)>gameCent[0]){
+            fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0],popUpRec[1]],[popUpRec[0],popUpRec[1]+popUpRec[3]/4],colText([0,200,0,0.25]))
+        }else{
+            fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0]+popUpRec[2],popUpRec[1]],[popUpRec[0]+popUpRec[2],popUpRec[1]+popUpRec[3]/4],colText([0,200,0,0.25]))
+        }
         
         options = []
         if(choosingFor.type =="empty"){
@@ -260,8 +264,8 @@ const checkRelease = function(){
 
 const doNew = function(){
     
-    if (confirm('This will erase your score for the current game type. Are you sure?')) {
-        console.log('clicked okay')
+    const doreset = function(){
+        console.log('game resetting')
         score = 0;
         gold = startGold;
         theDefences = [];
@@ -280,8 +284,19 @@ const doNew = function(){
         console.log("gamecleared")
         genGrid()
         sizeCanvas()
-
     }
+
+    if(!gameOver){
+        if (confirm('This will erase your score for the current game type. Are you sure?')) {
+            doreset()
+    
+        }
+    }else{
+        doreset()
+    }
+
+    
+    
 }
 
 const onMoveMouse = function(){
@@ -330,7 +345,7 @@ const click = function(){
                     }
                 }
             }
-        }else{
+        }else if(!gameOver){
 
             if(isInside([mdX,mdY],cancelButtonRec)||(!isInside([mdX,mdY],popUpRec)&&!isInside([mdX,mdY],menuButtonRec))){
                 choosing = false;
@@ -395,6 +410,10 @@ const click = function(){
                     }
                 }
             }
+        }else{
+            if(isInside([mdX,mdY],popUpRec)){
+                doNew()
+            }
         }
     }else{
         if(isInside([mdX,mdY],returnButtonRec)){
@@ -419,7 +438,7 @@ class Piece {
         this.health = 100;
         this.enemyNum = -1;
         this.range = 4;
-        this.damage = 0.5;
+        this.damage = 0.25;
         this.level = 1;
 
         this.draw = () => {
@@ -482,7 +501,7 @@ class Piece {
                         this.enemy = -1;
                     }
                 }else if(this.subtype == "slow"){
-                    theenemy.speedMod = 0.25;
+                    theenemy.speedMod *=0.5;
                 }
                 
 
@@ -495,7 +514,7 @@ class Enemy {
     constructor(type, pathnum){
         this.type = type
         this.color = [123,0,0]
-        this.speed = 0.1;
+        this.speed = 0.03;
         this.left = 50;
         this.top = 50;
         this.from = [-1,-1]
