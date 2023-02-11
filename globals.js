@@ -7,32 +7,32 @@ const canvas = document.createElement('canvas');
 const mainDiv = document.getElementsByTagName('main')[0]
 mainDiv.appendChild(canvas)
 const ctx = canvas.getContext("2d");
-const theMenuDiv = document.getElementById('themenu')
-const difficultyDiv = document.getElementById('difficulty')
-const gametypeDiv = document.getElementById('gametype')
+// const theMenuDiv = document.getElementById('themenu')
+// const difficultyDiv = document.getElementById('difficulty')
+// const gametypeDiv = document.getElementById('gametype')
 
-difficultyDiv.onchange = ()=>{  
-    // difficulty = difficultyDiv.selectedIndex
-    // if(gameGrids[difficulty*typesOfGoals.length + typeOfGoalNum][0]){
-    //     gameGrid = JSON.parse(JSON.stringify(gameGrids[difficulty*typesOfGoals.length + typeOfGoalNum]))
-    //     currentGoal = goals[difficulty*typesOfGoals.length + typeOfGoalNum]
-    // }else{
-    //     genGrid()
-    // }
-}
+// difficultyDiv.onchange = ()=>{  
+//     // difficulty = difficultyDiv.selectedIndex
+//     // if(gameGrids[difficulty*typesOfGoals.length + typeOfGoalNum][0]){
+//     //     gameGrid = JSON.parse(JSON.stringify(gameGrids[difficulty*typesOfGoals.length + typeOfGoalNum]))
+//     //     currentGoal = goals[difficulty*typesOfGoals.length + typeOfGoalNum]
+//     // }else{
+//     //     genGrid()
+//     // }
+// }
 
-gametypeDiv.onchange = ()=>{
-    // var ind = gametypeDiv.selectedIndex
-    // typeOfGoal = typesOfGoals[ind]
-    // typeOfGoalNum = ind
-    // console.log("game type changed", typeOfGoal)
-    // if(gameGrids[difficulty*typesOfGoals.length + typeOfGoalNum][0]){
-    //     gameGrid = JSON.parse(JSON.stringify(gameGrids[difficulty*typesOfGoals.length + typeOfGoalNum]))
-    //     currentGoal = goals[difficulty*typesOfGoals.length + typeOfGoalNum]
-    // }else{
-    //     genGrid()
-    // }
-}
+// gametypeDiv.onchange = ()=>{
+//     // var ind = gametypeDiv.selectedIndex
+//     // typeOfGoal = typesOfGoals[ind]
+//     // typeOfGoalNum = ind
+//     // console.log("game type changed", typeOfGoal)
+//     // if(gameGrids[difficulty*typesOfGoals.length + typeOfGoalNum][0]){
+//     //     gameGrid = JSON.parse(JSON.stringify(gameGrids[difficulty*typesOfGoals.length + typeOfGoalNum]))
+//     //     currentGoal = goals[difficulty*typesOfGoals.length + typeOfGoalNum]
+//     // }else{
+//     //     genGrid()
+//     // }
+// }
 
 const startTime = new Date();
 

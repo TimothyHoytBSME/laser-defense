@@ -176,6 +176,16 @@ const fillRec = function (rect,c){
     ctx.fillRect(rect[0],rect[1],rect[2],rect[3]);
 }
 
+const fillTri = function(p1,p2,p3,c){
+    ctx.beginPath()
+    ctx.moveTo(p1[0],p1[1])
+    ctx.lineTo(p2[0],p2[1])
+    ctx.lineTo(p3[0],p3[1])
+    ctx.lineTo(p1[0],p1[1])
+    ctx.fill()
+    ctx.closePath()
+}
+
 const drawLine = function (from, to, lineWidth, c){
     ctx.strokeStyle = c;
     ctx.lineWidth = lineWidth;
@@ -271,17 +281,8 @@ onmousemove = (e) => {
     mX = (mX < 0)? 0 : mX;  mX = (mX > brect.right*dvp)? brect.right*dvp : mX;
     mY = (mY < 0)? 0 : mY;  mY = (mY > brect.bottom*dvp)? brect.bottom*dvp : mY;
 
-    for(var i=0; i<gridDims[0]; i++){
-        for(var j=0; j<gridDims[1]; j++){
-            var piece = gameGrid[i][j]
-            if(piece.isOver(mX,mY)){
-                target = [i,j]
-                piece.isTarget = true;
-            }else{
-                piece.isTarget = false;
-            }
-        }
-    }
+    onMoveMouse()
+    
 }
 
 
@@ -346,30 +347,30 @@ const sizeCanvas = function(){
     }
 
 
-    if(verticalOrien){
-        difficultyDiv.style.height = (gameRec[3]/15/dvp).toString() + "px"
-        gametypeDiv.style.height = (gameRec[3]/15/dvp).toString() + "px"
-        difficultyDiv.style.width = (gameRec[2]/1.8/dvp).toString() + "px"
-        gametypeDiv.style.width = (gameRec[2]/1.8/dvp).toString() + "px"
+    // if(verticalOrien){
+    //     difficultyDiv.style.height = (gameRec[3]/15/dvp).toString() + "px"
+    //     gametypeDiv.style.height = (gameRec[3]/15/dvp).toString() + "px"
+    //     difficultyDiv.style.width = (gameRec[2]/1.8/dvp).toString() + "px"
+    //     gametypeDiv.style.width = (gameRec[2]/1.8/dvp).toString() + "px"
 
-        difficultyDiv.style.margin = (gameRec[3]/70/dvp).toString() + "px"
-        gametypeDiv.style.margin = (gameRec[3]/70/dvp).toString() + "px"
+    //     difficultyDiv.style.margin = (gameRec[3]/70/dvp).toString() + "px"
+    //     gametypeDiv.style.margin = (gameRec[3]/70/dvp).toString() + "px"
 
-        difficultyDiv.style.fontSize = (gameRec[2]/30/dvp).toString() + "px"
-        gametypeDiv.style.fontSize = (gameRec[2]/30/dvp).toString() + "px"
+    //     difficultyDiv.style.fontSize = (gameRec[2]/30/dvp).toString() + "px"
+    //     gametypeDiv.style.fontSize = (gameRec[2]/30/dvp).toString() + "px"
 
-    }else{
-        difficultyDiv.style.height = (gameRec[3]/10/dvp).toString() + "px"
-        gametypeDiv.style.height = (gameRec[3]/10/dvp).toString() + "px"
-        difficultyDiv.style.width = (gameRec[2]/3/dvp).toString() + "px"
-        gametypeDiv.style.width = (gameRec[2]/3/dvp).toString() + "px"
+    // }else{
+    //     difficultyDiv.style.height = (gameRec[3]/10/dvp).toString() + "px"
+    //     gametypeDiv.style.height = (gameRec[3]/10/dvp).toString() + "px"
+    //     difficultyDiv.style.width = (gameRec[2]/3/dvp).toString() + "px"
+    //     gametypeDiv.style.width = (gameRec[2]/3/dvp).toString() + "px"
 
-        difficultyDiv.style.margin = (gameRec[2]/60/dvp).toString() + "px"
-        gametypeDiv.style.margin = (gameRec[2]/60/dvp).toString() + "px"
+    //     difficultyDiv.style.margin = (gameRec[2]/60/dvp).toString() + "px"
+    //     gametypeDiv.style.margin = (gameRec[2]/60/dvp).toString() + "px"
 
-        difficultyDiv.style.fontSize = (gameRec[2]/50/dvp).toString() + "px"
-        gametypeDiv.style.fontSize = (gameRec[2]/50/dvp).toString() + "px"
-    }
+    //     difficultyDiv.style.fontSize = (gameRec[2]/50/dvp).toString() + "px"
+    //     gametypeDiv.style.fontSize = (gameRec[2]/50/dvp).toString() + "px"
+    // }
     
 
     gameCent = [gameRec[0]+gameRec[2]/2, gameRec[1] + gameRec[3]/2]
@@ -377,12 +378,12 @@ const sizeCanvas = function(){
     if(verticalOrien){
         gridSize[0] = gridDims[1]
         gridSize[1] = gridDims[0]
-        marg = gameRec[2]/60;
+        marg = gameRec[2]/100;
         size = (gameRec[2]-marg*2)/gridSize[0]
     }else{
         gridSize[1] = gridDims[1]
         gridSize[0] = gridDims[0]
-        marg = gameRec[3]/60;
+        marg = gameRec[3]/100;
         size = (gameRec[3]-marg*2)/gridSize[1]
     }
 
