@@ -412,6 +412,7 @@ const sizeCanvas = function(){
             var piece = gameGrid[pX][pY]
             piece.left = gridPos[0]+i*size+marg/2
             piece.top = gridPos[1]+j*size+marg/2
+            console.log('calculated grid positions')
         }
     }
 }

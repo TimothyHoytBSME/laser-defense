@@ -29,7 +29,7 @@ var gridSizePix = [1,1] //gets calculated
 var gridPos = [10,10] //gets calculated
 var numPaths = 2;
 var paths = new Array(numPaths).fill([]); //gets calculated
-var gold = 1000;
+var gold = 120;
 var numEnemies = 100;
 var theEnemies = [];   //gets calculated
 var enemyDelay = 50;
@@ -259,10 +259,26 @@ const checkRelease = function(){
 
 const doNew = function(){
     
-    // if (confirm('This will erase your score for the current game type. Are you sure?')) {
-    //     score = 0;
-    //     genGrid()
-    // }
+    if (confirm('This will erase your score for the current game type. Are you sure?')) {
+        console.log('clicked okay')
+        score = 0;
+        gold = 600;
+        theDefences = [];
+        theEnemies = [];
+        activeEnemies = []
+        sDelayCount = 0
+        eDelayCount = 0
+        paths = []
+        waveRunning = true; 
+        theBase = {};    //gets calculated
+        gameOver = false; 
+
+        theGrid = []
+        console.log("gamecleared")
+        genGrid()
+        sizeCanvas()
+
+    }
 }
 
 const onMoveMouse = function(){
@@ -568,6 +584,7 @@ const genGrid = function(){
     console.log('generating new grid')
     gameGrid = []
     const ranGrid = function(){
+        console.log('griddims',gridDims)
         for(var i=0; i<gridDims[0]; i++){
             const row = []
             for(var j=0; j<gridDims[1]; j++){
