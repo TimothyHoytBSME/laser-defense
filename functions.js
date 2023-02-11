@@ -180,7 +180,14 @@ const fillRec = function (rect,c){
     ctx.fillRect(rect[0],rect[1],rect[2],rect[3]);
 }
 
+const strokeRec = function (rect,w,c){
+    ctx.strokeStyle = c;
+    ctx.lineWidth = w;
+    ctx.strokeRect(rect[0],rect[1],rect[2],rect[3]);
+}
+
 const fillTri = function(p1,p2,p3,c){
+    ctx.fillStyle = c;
     ctx.beginPath()
     ctx.moveTo(p1[0],p1[1])
     ctx.lineTo(p2[0],p2[1])

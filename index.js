@@ -192,12 +192,7 @@ const drawPopup = function(){
     }
     if(choosing){
         fillRec(popUpRec,colText([0,0,0,0.75]))
-        fillCir([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2,pieceSize*0.5],colText([0,200,0,0.25]))
-        if((choosingFor.left+pieceSize/2)>gameCent[0]){
-            fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0],popUpRec[1]],[popUpRec[0],popUpRec[1]+popUpRec[3]/4],colText([0,200,0,0.25]))
-        }else{
-            fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0]+popUpRec[2],popUpRec[1]],[popUpRec[0]+popUpRec[2],popUpRec[1]+popUpRec[3]/4],colText([0,200,0,0.25]))
-        }
+        
         
         options = []
         if(choosingFor.type =="empty"){
@@ -226,8 +221,25 @@ const drawPopup = function(){
             var opleft = popUpRec[0] + popUpRec[2]*(0.25/(options.length+1))*(i+1)+opwid*i
             
             optionsRecs[i] = [opleft,popUpRec[1]+popUpRec[3]*0.3,opwid,popUpRec[3]*0.3]
-            fillRec(optionsRecs[i], colText([100,100,100,popUpAlpha]))  
+            var opRec = optionsRecs[i]
+            fillRec(opRec, colText([100,100,100,popUpAlpha])) 
+
+            if(options[i] == "basic" || options[i] == "slow"){
+                var col = (options[i] == "basic")? [100,100,0,popUpAlpha] : (options[i] == "slow")? [0,100,100,popUpAlpha] : [255,255,255]
+                fillRec([opRec[0]+opRec[2]/4, opRec[1]+opRec[3]/2-opRec[2]/4, opRec[2]/2,opRec[2]/2],colText([50,50,50,popUpAlpha]))
+                fillCir([opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/2, opRec[2]/6], colText(col)) 
+            }
+            
         }
+
+        if((choosingFor.left+pieceSize/2)>gameCent[0]){
+            fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0],popUpRec[1]],[popUpRec[0],popUpRec[1]+popUpRec[3]/4],colText([0,200,0,0.25]))
+        }else{
+            fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0]+popUpRec[2],popUpRec[1]],[popUpRec[0]+popUpRec[2],popUpRec[1]+popUpRec[3]/4],colText([0,200,0,0.25]))
+        }
+        strokeRec(popUpRec,3,colText([0,200,0,0.25]))
+        fillCir([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2,pieceSize*0.5],colText([0,200,0,0.25]))
+
     }
 }
 
@@ -800,9 +812,7 @@ const drawTexts = function(){
                     }else{
                         optionText = "CHANGE" //options[i].toUpperCase()
                         // fillText(opRec[0]+opRec[2]/2, opRec[1]-textH*0.5, "CHANGE TO", textH*0.5, "white")
-                        var col = (options[i] == "basic")? [100,100,0,popUpAlpha] : (options[i] == "slow")? [0,100,100,popUpAlpha] : [255,255,255]
-                        fillRec([opRec[0]+opRec[2]/4, opRec[1]+opRec[3]/2-opRec[2]/4, opRec[2]/2,opRec[2]/2],colText([50,50,50,popUpAlpha]))
-                        fillCir([opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/2, opRec[2]/6], colText(col))
+                        
                     }
                 }
                 fillText(opRec[0]+opRec[2]/2, opRec[1], optionText, textH*0.5, "white")
