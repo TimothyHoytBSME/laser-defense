@@ -18,6 +18,7 @@ var gameGrid = [] //gets calculated
 var newButtonRec = [] //gets calculated
 var menuButtonRec = [] //gets calculated
 var sellButtonRec = [] //gets calculated
+
 var cancelButtonRec = [] //gets calculated
 var optionsRecs = [] //gets calculated
 var popUpRec = [] //getscalculated
@@ -397,14 +398,27 @@ const click = function(){
                                 theDefences.push(choosingFor)
                             }
                         }else if(choosingFor.type == "defense"){
-                            if(options[i] == "upgrade"){
-                                //todo upgrades...
+                            if(options[i] == "upgrade1"){
+                                choosingFor.numLasers++
+                                choosingFor.cost += thePrice
+                                console.log("dfghmfghjmghk,")
+                            }else if(options[i] == "upgrade2"){
+                                if(choosingFor.subtype == "slow"){
+                                    choosingFor.damage/=2
+                                }else{
+                                    choosingFor.damage+=0.25
+                                }
+                                choosingFor.cost += thePrice
+                            }else if(options[i] == "upgrade3"){
+                                choosingFor.range++
+                                choosingFor.cost += thePrice
                             }else if(options[i] == "slow"){
-                                //todo change type
                                 choosingFor.subtype = "slow"
+                                choosingFor.cost = thePrice
                             }else if(options[i] == "basic"){
-                                //todo change type
                                 choosingFor.subtype = "basic"
+                                choosingFor.cost = thePrice
+
                             }
                         }else if(choosingFor.type == "base"){
                             if(options[i] == "repair"){
@@ -412,6 +426,15 @@ const click = function(){
                                 
                                 theBase.health+= thePrice
                                 
+                            }if(options[i] == "upgrade1"){
+                                choosingFor.numLasers ++
+                                choosingFor.cost += thePrice
+                            }else if(options[i] == "upgrade2"){
+                                choosingFor.damage++
+                                choosingFor.cost += thePrice
+                            }else if(options[i] == "upgrade3"){
+                                choosingFor.range++
+                                choosingFor.cost += thePrice
                             }
                         }
                         gold-= thePrice
@@ -511,6 +534,11 @@ class Piece {
             if(this.enemies[0] > -1){
 
                 for(var ei=0; ei<this.enemies.length; ei++){
+                    if(this.enemies[ei]<0){
+                        console.warn(this.enemies[ei])
+                    }else if(this.enemies[ei] > (theEnemies.length-1)){
+                        console.warn(this.enemies[ei])
+                    }
                     var theenemy = theEnemies[this.enemies[ei]]
                     var tar = [theenemy.left+pieceSize/4, theenemy.top + pieceSize/4]
                     var sz = 3; var co = [200,180,0,0.8]
@@ -544,7 +572,7 @@ class Piece {
     }
 }
 
-class Enemy {
+class Enemy { 
     constructor(type, pathnum){
         this.type = type
         this.color = [123,0,0]
@@ -554,7 +582,7 @@ class Enemy {
         this.from = [-1,-1]
         this.to  = [-1,-1]
         this.health = 100;
-        this.damage = 10;
+        this.damage = 10; 
         this.pathNum = pathnum;
         this.reward = 1;
         // console.log(paths)
@@ -887,8 +915,16 @@ const drawTexts = function(){
                 fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/8, optionText2, textH*0.5, "white")
 
                 if(options[i] == "repair"){
-                    fillText(opRec[0]+opRec[2]/3, opRec[1]+opRec[3]/1.75,"+",textH*3,"red")
-                    fillText(opRec[0]+opRec[2]/1.35, opRec[1]+opRec[3]/1.9, prices[i].toString(),textH, "red")
+                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/2.25,"+",textH*1.5,"red")
+                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.25, prices[i].toString(),textH, "red")
+                }else if(options[i] == "upgrade1"){ //lasers
+                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.8,"+1",textH*1.5,colText([200,200,200,0.75]))
+                }else if(options[i] == "upgrade2"){ //power
+                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.8,"+1",textH*1.5,colText([200,200,200,0.75]))
+                }else if(options[i] == "upgrade3"){ //range
+                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.8,"+1",textH*1.5,colText([200,200,200,0.75]))
+
+                    
                 }
                 
             }
