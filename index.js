@@ -234,77 +234,57 @@ const moveEnemies = function(){
     }
 }
 
-const checkRelease = function(){
-    if(gameActive){
-        //     soundPlayed = false
-        // justScored = true
-        if(selected[0]>-1){
-            var sPiece = gameGrid[selected[0]][selected[1]]
-            if(arrEq(selected, target)&&!(sPiece.type == "path")&&waveRunning){
-                
-                choosing = true;
-                console.log("opening options for",sPiece)
-                choosingFor = sPiece
-                waveRunning = false;
-
-
-                options = []
-                if(choosingFor.type =="empty"){
-                    options = [...subtypes]
-                }else if(choosingFor.type == "base"){
-                    options = ["upgrade1", "upgrade2", "upgrade3", "repair"]
-                }else if(choosingFor.type == "defense"){
-                    options = ["upgrade1", "upgrade2", "upgrade3"]
-                    for(var i=0; i<subtypes.length; i++){
-                        if(subtypes[i] != choosingFor.subtype){
-                            options.push(subtypes[i])
-                        }
-                    }
-                }
-                
-                for (var i = 0; i< options.length; i++){
-                    switch(options[i]){
-                        case "upgrade1":
-                            prices[i] = choosingFor.cost
-                            break;
-                        case "upgrade2":
-                            prices[i] = floor(choosingFor.cost/2)
-                            break;
-                        case "upgrade3":
-                            prices[i] = floor(choosingFor.cost*1.5)
-                            break;
-                        case "slow":
-                            prices[i] = (choosingFor.type == "empty")? startPrices[1] : floor(choosingFor.cost)
-                            
-                            break;
-                        case "basic":
-                            prices[i] = (choosingFor.type == "empty")? startPrices[0] : floor(choosingFor.cost)
-                            break;  
-                        case "repair":
-                            prices[i] = 100;
-                            var maxPrice = prices[i]
-                            maxPrice *= (100-theBase.health)/100
-                            maxPrice = ceil(maxPrice )
-                            if(maxPrice > gold){maxPrice = gold}
-                            prices[i] = maxPrice
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                
-                
+const towerOptions = function(){
+    options = []
+    if(choosingFor.type =="empty"){
+        options = [...subtypes]
+    }else if(choosingFor.type == "base"){
+        options = ["upgrade1", "upgrade2", "upgrade3", "repair"]
+    }else if(choosingFor.type == "defense"){
+        options = ["upgrade1", "upgrade2", "upgrade3"]
+        for(var i=0; i<subtypes.length; i++){
+            if(subtypes[i] != choosingFor.subtype){
+                options.push(subtypes[i])
             }
-            sPiece.isSelected = false;
-            selected = [-1,-1]
         }
-        
-        if(target[0]>-1){
-            gameGrid[target[0]][target[1]].isTarget = false;
-            target = [-1,-1]
+    }
+
+    //set prices
+    for (var i = 0; i< options.length; i++){
+        switch(options[i]){
+            case "upgrade1": //laserCount
+                prices[i] = choosingFor.cost
+                break;
+            case "upgrade2": //power
+                prices[i] = floor(choosingFor.cost/2)
+                break;
+            case "upgrade3": //range
+                prices[i] = floor(choosingFor.cost*1.5)
+                break;
+            case "slow":    //build or change
+                prices[i] = (choosingFor.type == "empty")? startPrices[1] : floor(choosingFor.cost/(startPrices[0]/startPrices[1]))
+                
+                break;
+            case "basic":   //build or change
+                prices[i] = (choosingFor.type == "empty")? startPrices[0] : floor(choosingFor.cost*(startPrices[0]/startPrices[1]))
+                break;  
+            case "repair":
+                prices[i] = 100;
+                var maxPrice = prices[i]
+                maxPrice *= (100-theBase.health)/100
+                maxPrice = ceil(maxPrice )
+                if(maxPrice > gold){maxPrice = gold}
+                prices[i] = maxPrice
+                break;
+            default:
+                break;
         }
     }
 }
+
+
+
+
 
 const doNew = function(){
     
@@ -319,7 +299,7 @@ const doNew = function(){
         eDelayCount = 0
         paths = []
         waveRunning = true; 
-        waveNum = 2;
+        waveNum = 1;
         theBase = {};    //gets calculated
         gameOver = false; 
         choosing = false;
@@ -378,6 +358,7 @@ const click = function(){
             // theMenuDiv.style.visibility = "visible"
         }
 
+        //grid clicked
         if(waveRunning){
             for(var i=0; i<gridDims[0]; i++){
                 for(var j=0; j<gridDims[1]; j++){
@@ -391,7 +372,7 @@ const click = function(){
                 }
             }
         }else if(!gameOver){
-
+            //popup clicked
             if(isInside([mdX,mdY],cancelButtonRec)||(!isInside([mdX,mdY],popUpRec)&&!isInside([mdX,mdY],menuButtonRec))){
                 choosing = false;
                 choosingFor = null
@@ -411,11 +392,7 @@ const click = function(){
                 waveRunning = true;
             }
             
-            console.log(
-                "calculating costs"
-            )
-            
-
+            //option clicked
             for(var i=0; i<options.length; i++){
                 if(isInside([mdX,mdY],optionsRecs[i])){
                     console.log('option '+i.toString()+" clicked")
@@ -477,12 +454,17 @@ const click = function(){
                                 choosingFor.cost += thePrice
                             }
                         }
-                        gold-= thePrice
-                        choosing = false;
-                        choosingFor = null;
+                        
+
                         options=[]
-                        console.log("option "+options[i]+" clicked")
-                        waveRunning = true;
+                        console.log("option "+options[i]+" purchased for " + prices[i])
+                        console.log("purchase for:", choosingFor)
+                        gold -= prices [i]
+
+                        towerOptions()
+                    }else{
+                        console.log("CANNOT AFFORD")
+                        //todo visual indicator
                     }
                 }
             }
@@ -495,6 +477,38 @@ const click = function(){
         if(isInside([mdX,mdY],returnButtonRec)){
             console.log("return clicked")
             gameActive = true;
+        }
+    }
+}
+
+
+const checkRelease = function(){
+    if(gameActive){
+        //     soundPlayed = false
+        // justScored = true
+        if(selected[0]>-1){
+            var sPiece = gameGrid[selected[0]][selected[1]]
+            if(arrEq(selected, target)&&!(sPiece.type == "path")&&waveRunning){
+                
+                if(choosing == false){
+                    choosing = true;
+                    console.log("opening options for",sPiece)
+                    choosingFor = sPiece
+                    waveRunning = false;
+                }
+                
+
+                //available option names
+                towerOptions()
+                
+            }
+            sPiece.isSelected = false;
+            selected = [-1,-1]
+        }
+        
+        if(target[0]>-1){
+            gameGrid[target[0]][target[1]].isTarget = false;
+            target = [-1,-1]
         }
     }
 }
@@ -520,18 +534,30 @@ const genGrid = function(){
 
     ranGrid()
 
+    makeBase()
+    
+    genPaths()
+
+    genEnemies()
+    saveGame()
+}
+
+const makeBase = function(){
     var baseP = [floor(gridDims[0]/2),floor(gridDims[1]/2)]//[floor(random()*gridDims[0]),floor(random()*gridDims[1])]
     
     theBase = gameGrid[baseP[0]][baseP[1]]
     theBase.type = "base"
     theBase.cost = 100
+}
+
+const genPaths = function(){
     //todo generate paths
     
     for(var p=0; p<numPaths; p++){
         var path = []
         var xd = p*2-1;
         var yd = 0;
-        path.push([...baseP])
+        path.push([...[theBase.px, theBase.py]])
         var done = false;
 
         while(!done){
@@ -564,11 +590,7 @@ const genGrid = function(){
     }
 
     // console.log("paths",paths)
-
-    genEnemies()
-    saveGame()
 }
-
 
 const genEnemies = function(){
     
@@ -584,236 +606,3 @@ const genEnemies = function(){
 
     console.log('enemies', theEnemies)
 }
-
-
-
-
-
-
-
-
-
-const drawTexts = function(){
-    if(verticalOrien){
-        textW = gameRec[2]/5
-    }else{
-        textW = gameRec[3]/5
-    }
-    
-    const textXoff = textW/8
-    textH = textW*0.375
-
-    if(gameActive){
-        
-        newButtonRec = [gameRec[0]+textXoff, gameRec[1]+gameRec[3]-textH, textW, textH]
-        shadowText(newButtonRec[0], newButtonRec[1]+newButtonRec[3], "NEW", newButtonRec[3], "black")
-        fillText(newButtonRec[0], newButtonRec[1]+newButtonRec[3], "NEW", newButtonRec[3], "white")
-
-        menuButtonRec = [gameRec[0]+gameRec[2]-textXoff*2-textW, gameRec[1]+gameRec[3]-textH, textW, textH]
-        shadowText(menuButtonRec[0], menuButtonRec[1]+menuButtonRec[3], "MENU", menuButtonRec[3], "black")
-        fillText(menuButtonRec[0], menuButtonRec[1]+menuButtonRec[3], "MENU", menuButtonRec[3], "white")
-
-        ctx.textAlign = "center"
-        ctx.textBaseline = 'middle'
-        if(verticalOrien){
-            shadowText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1], "SCORE", textH*0.75, "black")
-            fillText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1], "SCORE", textH*0.75, "white")
-            shadowText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1]+textH, score.toString(), textH*0.75, "black")
-            fillText(gameCent[0]+textH*4, gameRec[3]/10+gameRec[1]+textH, score.toString(), textH*0.75, "white")
-
-            shadowText(gameCent[0], gameRec[3]/10+gameRec[1], "GOLD", textH*0.75, "black")
-            fillText(gameCent[0], gameRec[3]/10+gameRec[1], "GOLD", textH*0.75, "white")
-            shadowText(gameCent[0], gameRec[3]/10+gameRec[1]+textH, gold.toString(), textH*0.75, "black")
-            fillText(gameCent[0], gameRec[3]/10+gameRec[1]+textH, gold.toString(), textH*0.75, "white")
-
-            shadowText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1], "WAVE", textH*0.75, "black")
-            fillText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1], "WAVE", textH*0.75, "white")
-            shadowText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1]+textH, waveNum.toString(), textH*0.75, "black")
-            fillText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1]+textH, waveNum.toString(), textH*0.75, "white")
-
-        }else{
-            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*3, "SCORE", textH*0.75, "black")
-            fillText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*3, "SCORE", textH*0.75, "white")
-            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*2, score.toString(), textH*0.75, "black")
-            fillText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*2, score.toString(), textH*0.75, "white")
-
-            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]+textH, "GOLD", textH*0.75, "black")
-            fillText(gameRec[2]/13+gameRec[0], gameCent[1]+textH, "GOLD", textH*0.75, "white")
-            shadowText(gameRec[2]/13+gameRec[0], gameCent[1]+textH*2, gold.toString(), textH*0.75, "black")
-            fillText(gameRec[2]/13+gameRec[0], gameCent[1]+textH*2, gold.toString(), textH*0.75, "white")
-
-            shadowText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, "WAVE", textH*0.75, "black")
-            fillText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, "WAVE", textH*0.75, "white")
-            shadowText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*2, waveNum.toString(), textH*0.75, "black")
-            fillText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*2, waveNum.toString(), textH*0.75, "white")
-        }
-        ctx.textAlign = "left"
-        ctx.textBaseline = 'bottom'
-        
-        if(gameOver){
-            // fillRec([gridPos[0]+gridSizePix[0]/4, gridPos[1]+gridSizePix[1]/4, gridSizePix[0]/2, gridSizePix[1]/2],colText([0,0,0]))
-            ctx.textAlign = "center"
-            ctx.textBaseline = 'middle'
-            fillText(gameCent[0], gameCent[1], "GAME OVER", textH*0.75, "white")
-            ctx.textAlign = "left"
-            ctx.textBaseline = 'bottom'
-        }
-
-
-        if(choosing){
-            ctx.textAlign = "center"
-            ctx.textBaseline = 'middle'
-            var chTyp = choosingFor.type
-            var chSubT = choosingFor.subtype
-            var title = (chTyp == "empty")? chTyp.toUpperCase() + " SPACE" : (chTyp == "base")? "YOUR BASE" : chSubT.toUpperCase() + " " + chTyp.toUpperCase()
-            if(chTyp == "defense"){
-                title+= " TOWER"
-            }
-            fillText(gameCent[0], popUpRec[1]+textH*0.75, title, textH*0.5, "white")
-            
-
-            //todo stats
-
-            //numLasers
-            var numLText = choosingFor.numLasers.toString()
-            
-            //power
-            var powText = choosingFor.power.toString()
-
-            //range
-            var ranText = choosingFor.range.toString()
-
-            var top1 = popUpRec[1] + textH*2;
-            var top2 = popUpRec[1] + textH*2.5;
-            var leftInc = popUpRec[2]/4;
-            var tsize = textH/2;
-
-            if(chTyp == "base"){
-                leftInc = popUpRec[2]/5;
-                //health
-                fillText(popUpRec[0] + leftInc*4,top1,"HEALTH",tsize,"white")
-                fillText(popUpRec[0] + leftInc*4,top2, floor(choosingFor.health).toString(),tsize,"white")
-            }
-
-            fillText(popUpRec[0] + leftInc,top1, "LASERS" ,tsize, "white")
-            fillText(popUpRec[0] + leftInc,top2, numLText,tsize, "white")
-
-            fillText(popUpRec[0] + leftInc*2,top1, "POWER",tsize, "white")
-            fillText(popUpRec[0] + leftInc*2,top2, powText,tsize, "white")
-            
-            fillText(popUpRec[0] + leftInc*3,top1, "RANGE",tsize, "white")
-            fillText(popUpRec[0] + leftInc*3,top2,ranText ,tsize, "white")
-
-
-            for(var i=0; i<options.length; i++){
-                var opRec = optionsRecs[i]
-                var optionText = "BUILD " + options[i].toUpperCase()
-                if(chTyp == "base"){
-                    optionText = options[i].toUpperCase()
-                    
-                }else if(chTyp == "defense"){
-                    if(options[i] == "upgrade"){
-                        optionText = options[i].toUpperCase()
-                    }else{
-                        optionText = "CHANGE"
-                    }
-                }
-                if(options[i] == "upgrade1" || options[i] == "upgrade2" || options[i] == "upgrade3"){
-                    optionText = ""
-                }
-                
-                fillText(opRec[0]+opRec[2]/2, opRec[1], optionText, textH*0.5, "white")
-
-                
-
-                var optionText2 = prices[i].toString() + " G"
-
-                fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/8, optionText2, textH*0.5, "white")
-
-                if(options[i] == "repair"){
-                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/2.25,"+",textH*1.5,"red")
-                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.25, prices[i].toString(),textH, "red")
-                }else if(options[i] == "upgrade1"){ //lasers
-                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.8,"+1",textH*1.5,colText([200,200,200,0.75]))
-                }else if(options[i] == "upgrade2"){ //power
-                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.8,"+1",textH*1.5,colText([200,200,200,0.75]))
-                }else if(options[i] == "upgrade3"){ //range
-                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.8,"+1",textH*1.5,colText([200,200,200,0.75]))
-
-                    
-                }
-                
-            }
-
-            var sellText = "SELL (" + floor((choosingFor.cost/2)).toString() + " G)"
-            if(chTyp != "defense"){
-                sellText = "CANNOT SELL"
-            }
-            fillText(sellButtonRec[0]+sellButtonRec[2]/2, sellButtonRec[1]+sellButtonRec[3]/2, sellText, textH*0.5, "white")
-            fillText(cancelButtonRec[0]+cancelButtonRec[2]/2, cancelButtonRec[1]+cancelButtonRec[3]/2, "EXIT", textH*0.5, "white")
-
-            ctx.textAlign = "left"
-            ctx.textBaseline = 'bottom'
-        }
-
-    }else{
-        //paused
-        returnButtonRec = [gameRec[0]+gameRec[2]-textXoff*5-textW, gameRec[1]+gameRec[3]-textH, textW*2, textH]
-        shadowText(returnButtonRec[0], returnButtonRec[1]+returnButtonRec[3], "RETURN", returnButtonRec[3], "black")
-        fillText(returnButtonRec[0], returnButtonRec[1]+returnButtonRec[3], "RETURN", returnButtonRec[3], "white")
-
-        ctx.textAlign = 'center'
-        var message1 = "Instructions line 1".toUpperCase()
-        shadowText(gameCent[0], gameCent[1]-gameRec[3]/3, message1, textH, "black")
-        fillText(gameCent[0], gameCent[1]-gameRec[3]/3, message1, textH, "white")
-
-        var message2 = "Instructions line 2".toUpperCase()
-        shadowText(gameCent[0], gameCent[1]+textH-gameRec[3]/3, message2, textH, "black")
-        fillText(gameCent[0], gameCent[1]+textH-gameRec[3]/3, message2, textH, "white")
-        ctx.textAlign = 'left'
-    }
-}
-
-
-
-
-
-
-
-
-
-
-const saveGame = function(){
-    // const gameObj = {\
-    //     "gameGrid": deepClone(gameGrid)
-    //     "difficulty": difficulty,
-    //     "score": [...score],
-    //     "gridDims": [...gridDims],
-    // }
-
-    // const gameString = JSON.stringify(gameObj)
-    // window.localStorage.setItem(Version,gameString)
-    // console.log("GAME SAVED")
-}
-
-
-const loadGameDataIfAble = function(){
-    if (!(localStorage.getItem(Version) === null)) {
-        const gameObj = JSON.parse(window.localStorage.getItem(Version))
-        // difficulty = gameObj.difficulty
-        // difficultyDiv.selectedIndex = difficulty
-        // score = [...gameObj.score]
-        // gridDims = [...gameObj.gridDims]
-        // gameGrid = deepClone(gameObj.gameGrid)
-
-        console.log('GAME LOADED FROM STORAGE')
-    }else{
-    
-        genGrid()
-    }
-}
-
-
-
-
-

@@ -153,6 +153,7 @@ const isEven = function(num){
 //     return [255 - col[0], 255 - col[1], 255 - col[2]]
 // }
 
+
 const colText = function(col){
     var CCC = [...col]
 
@@ -161,6 +162,7 @@ const colText = function(col){
     console.error('whoops')
     return 'rgb(255,255,255)'
 }
+
 
 const fillCir = function (cir,c){ctx.beginPath(); ctx.arc(cir[0], cir[1], cir[2], 0, 2 * Math.PI, false);ctx.fillStyle = c;  ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(0,0,0,0)';  ctx.stroke();}
 
@@ -227,6 +229,29 @@ const shadowText = function(xx,yy,tt,ss,c){
     ctx.strokeText(tt, xx, yy);
     ctx.shadowBlur = 0
 }
+
+const wrapText= function(x, y, text, ss, maxWidth, c){
+    var words = text.split(' ');
+    var line = '';
+    ctx.fillStyle = c;
+    ctx.font = ss.toString() + "px bold arial";
+  
+    for(var n = 0; n < words.length; n++) {
+      var testLine = line + words[n] + ' ';
+      var metrics = ctx.measureText(testLine);
+      var testWidth = metrics.width;
+      if(testWidth > maxWidth) {
+        ctx.fillText(line, x, y);
+        line = words[n] + ' ';
+        y += ss;
+      }
+      else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line, x, y);
+    return(y);
+  }
 
 const onMouseDownCanvas = function(){ 
     mouseDownCan = true;
