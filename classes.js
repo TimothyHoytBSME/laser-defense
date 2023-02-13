@@ -115,16 +115,24 @@ class Piece {
 }
 
 class Enemy { 
-    constructor(type, pathnum){
+    constructor(type, pathnum, ss){
         this.type = type
         this.color = [123,0,0]
-        this.speed = 0.03*(-.5+1.5*waveNum);
+        if(type == "brute"){
+            this.color = [123, 160, 10]
+        }
+        this.speed = 0.02 + 0.01*waveNum;
+        if(type == "brute"){
+            this.speed*=0.6
+        }
         this.left = 50;
         this.top = 50;
+        this.size = 1;
         this.from = [-1,-1]
         this.to  = [-1,-1]
         this.health = 100;
         this.armor = 0.5+(0.25*waveNum);
+        if(type == "brute"){ this.armor*=3;}
         this.damage = 10+(waveNum); 
         this.pathNum = pathnum;
         this.reward = waveNum;
@@ -135,6 +143,7 @@ class Enemy {
         this.speedMod = 1; //ratio of 1 changed by lasers
 
         this.draw = ()=>{
+            this.size =pieceSize/2;
             if((this.to[0]<0)||(this.from[0]<0)){
                 if(this.visible){
                     this.visible = false
@@ -144,8 +153,8 @@ class Enemy {
             }
 
             if(this.visible){
-                fillRec([this.left, this.top, pieceSize/2, pieceSize/2], colText(this.color));
-                fillRec([this.left, this.top+pieceSize/2*0.9, (pieceSize/2)*this.health/100, pieceSize/2*0.1], colText([123,255,0]))
+                fillRec([this.left, this.top, this.size, this.size], colText(this.color));
+                fillRec([this.left, this.top+this.size*0.9, (this.size)*this.health/100, this.size*0.1], colText([123,255,0]))
             }
 
         }
@@ -162,14 +171,14 @@ class Enemy {
 
             if(this.to[0]>-1){
                 var destPiece = gameGrid[this.to[0]][this.to[1]]
-                var pastLeft = spDir[0]*((destPiece.left + pieceSize/2) - (this.left + pieceSize/4)) <= 0
-                var pastTop = spDir[1]*((destPiece.top + pieceSize/2) - (this.top + pieceSize/4)) <= 0
+                var pastLeft = spDir[0]*((destPiece.left + this.size) - (this.left + this.size/2)) <= 0
+                var pastTop = spDir[1]*((destPiece.top + this.size) - (this.top + this.size/2)) <= 0
 
                 if(pastLeft){
-                    this.left = destPiece.left + pieceSize/4
+                    this.left = destPiece.left + this.size/2
                 }
                 if(pastTop){
-                    this.top = destPiece.top + pieceSize/4
+                    this.top = destPiece.top + this.size/2
                 }
 
                 if(pastLeft&&pastTop){

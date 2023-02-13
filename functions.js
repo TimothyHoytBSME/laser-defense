@@ -426,6 +426,8 @@ const sizeCanvas = function(){
             console.log('calculated grid positions')
         }
     }
+
+    
 }
 
 

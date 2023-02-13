@@ -32,7 +32,7 @@ var numPaths = 2;
 var paths = new Array(numPaths).fill([]); //gets calculated
 var startGold = 40  ;
 var gold = startGold;
-var numEnemies = 100;
+var numEnemies = 50; //gets calculated
 var theEnemies = [];   //gets calculated
 var enemyDelay = 50;
 var startDelay = 100; //500
@@ -319,6 +319,7 @@ const doNew = function(){
         eDelayCount = 0
         paths = []
         waveRunning = true; 
+        waveNum = 2;
         theBase = {};    //gets calculated
         gameOver = false; 
         choosing = false;
@@ -443,7 +444,7 @@ const click = function(){
                                 console.log("dfghmfghjmghk,")
                             }else if(options[i] == "upgrade2"){
                                 if(choosingFor.subtype == "slow"){
-                                    choosingFor.power/=2
+                                    choosingFor.power++
                                 }else{
                                     choosingFor.power++
                                 }
@@ -570,14 +571,18 @@ const genGrid = function(){
 
 
 const genEnemies = function(){
+    
     numEnemies = numEnemies + waveNum*5
     for(var i=0; i<numEnemies; i++){
-        var newEn = new Enemy("grunt",floor(random()*numPaths))
+
+        var type = ((waveNum>1)&& (random()>0.9**waveNum))? "brute" : "grunt"
+        var pathnum = floor(random()*numPaths)
+        var newEn = new Enemy(type,pathnum)
         theEnemies.push(newEn)
 
     }
 
-    
+    console.log('enemies', theEnemies)
 }
 
 
