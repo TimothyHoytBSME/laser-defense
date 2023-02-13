@@ -533,7 +533,7 @@ class Piece {
             
             if(this.enemies[0] > -1){
 
-                for(var ei=0; ei<this.enemies.length; ei++){
+                for(var ei=this.enemies.length -1; ei>=0; ei--){
                     if(this.enemies[ei]<0){
                         console.warn(this.enemies[ei])
                     }else if(this.enemies[ei] > (theEnemies.length-1)){
@@ -558,7 +558,11 @@ class Piece {
                             theenemy.destroy()
                             score+=theenemy.reward
                             gold+=theenemy.reward
-                            this.enemies[0] = -1;
+                            if(ei > 0){
+                                this.enemies.pop()
+                            }else{
+                                this.enemies[0] = -1
+                            }
                         }
                     }else if(this.subtype == "slow"){
                         theenemy.speedMod *=this.damage;
