@@ -402,77 +402,87 @@ const click = function(){
             }
             
             //option clicked
+            // console.log('checking options', options, optionsRecs)
+            var done = false
             for(var i=0; i<options.length; i++){
-                if(isInside([mdX,mdY],optionsRecs[i])){
-                    console.log('option '+i.toString()+" clicked")
-                    var thePrice = prices[i]
+                if(!done){
+                    console.log('checking', i)
+                    console.log(options,optionsRecs)
+                    
+                    if((optionsRecs[i])&&isInside([mdX,mdY],optionsRecs[i])){
+                        console.log('option '+i.toString()+" clicked")
+                        var thePrice = prices[i]
 
-                    if(gold >= thePrice){
-                        if(choosingFor.type == "empty"){
+                        if(gold >= thePrice){
+
+                            if(choosingFor.type == "empty"){
 
 
-                            if(options[i] == "basic"){
-                                choosingFor.type = "defense"
-                                choosingFor.subtype = "basic"
-                                choosingFor.cost = startPrices[0]
-                                theDefences.push(choosingFor)
-                            }else if(options[i] == "slow"){
-                                choosingFor.type = "defense"
-                                choosingFor.subtype = "slow"
-                                choosingFor.numLasers = 3;
-                                choosingFor.cost = startPrices[1]
-                                theDefences.push(choosingFor)
-                            }
-                        }else if(choosingFor.type == "defense"){
-                            if(options[i] == "upgrade1"){
-                                choosingFor.numLasers++
-                                choosingFor.cost += thePrice
-                                console.log("dfghmfghjmghk,")
-                            }else if(options[i] == "upgrade2"){
-                                if(choosingFor.subtype == "slow"){
-                                    choosingFor.power++
-                                }else{
-                                    choosingFor.power++
+                                if(options[i] == "basic"){
+                                    choosingFor.type = "defense"
+                                    choosingFor.subtype = "basic"
+                                    choosingFor.cost = startPrices[0]
+                                    theDefences.push(choosingFor)
+                                }else if(options[i] == "slow"){
+                                    choosingFor.type = "defense"
+                                    choosingFor.subtype = "slow"
+                                    choosingFor.numLasers = 3;
+                                    choosingFor.cost = startPrices[1]
+                                    theDefences.push(choosingFor)
                                 }
-                                choosingFor.cost += thePrice
-                            }else if(options[i] == "upgrade3"){
-                                choosingFor.range++
-                                choosingFor.cost += thePrice
-                            }else if(options[i] == "slow"){
-                                choosingFor.subtype = "slow"
-                                choosingFor.cost = thePrice
-                            }else if(options[i] == "basic"){
-                                choosingFor.subtype = "basic"
-                                choosingFor.cost = thePrice
+                            }else if(choosingFor.type == "defense"){
+                                if(options[i] == "upgrade1"){
+                                    choosingFor.numLasers++
+                                    choosingFor.cost += thePrice
+                                    console.log("dfghmfghjmghk,")
+                                }else if(options[i] == "upgrade2"){
+                                    if(choosingFor.subtype == "slow"){
+                                        choosingFor.power++
+                                    }else{
+                                        choosingFor.power++
+                                    }
+                                    choosingFor.cost += thePrice
+                                }else if(options[i] == "upgrade3"){
+                                    choosingFor.range++
+                                    choosingFor.cost += thePrice
+                                }else if(options[i] == "slow"){
+                                    choosingFor.subtype = "slow"
+                                    choosingFor.cost = thePrice
+                                }else if(options[i] == "basic"){
+                                    choosingFor.subtype = "basic"
+                                    choosingFor.cost = thePrice
 
+                                }
+                            }else if(choosingFor.type == "base"){
+                                if(options[i] == "repair"){
+                                    console.log('repairing base')
+                                    
+                                    theBase.health+= thePrice
+                                    
+                                }if(options[i] == "upgrade1"){
+                                    choosingFor.numLasers ++
+                                    choosingFor.cost += thePrice
+                                }else if(options[i] == "upgrade2"){
+                                    choosingFor.power++
+                                    choosingFor.cost += thePrice
+                                }else if(options[i] == "upgrade3"){
+                                    choosingFor.range++
+                                    choosingFor.cost += thePrice
+                                }
                             }
-                        }else if(choosingFor.type == "base"){
-                            if(options[i] == "repair"){
-                                console.log('repairing base')
-                                
-                                theBase.health+= thePrice
-                                
-                            }if(options[i] == "upgrade1"){
-                                choosingFor.numLasers ++
-                                choosingFor.cost += thePrice
-                            }else if(options[i] == "upgrade2"){
-                                choosingFor.power++
-                                choosingFor.cost += thePrice
-                            }else if(options[i] == "upgrade3"){
-                                choosingFor.range++
-                                choosingFor.cost += thePrice
-                            }
+                            
+
+                            
+                            console.log("option "+options[i]+" purchased for " + prices[i])
+                            console.log("purchase for:", choosingFor)
+                            gold -= prices [i]
+
+                            options=[]
+                            done = true;
+                            towerOptions()
+                        }else{
+                            console.log("CANNOT AFFORD")
                         }
-                        
-
-                        options=[]
-                        console.log("option "+options[i]+" purchased for " + prices[i])
-                        console.log("purchase for:", choosingFor)
-                        gold -= prices [i]
-
-                        towerOptions()
-                    }else{
-                        console.log("CANNOT AFFORD")
                     }
                 }
             }
