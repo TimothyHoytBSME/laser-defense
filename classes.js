@@ -118,21 +118,21 @@ class Enemy {
     constructor(type, pathnum){
         this.type = type
         this.color = [123,0,0]
-        this.speed = 0.03;
+        this.speed = 0.03*(-.5+1.5*waveNum);
         this.left = 50;
         this.top = 50;
         this.from = [-1,-1]
         this.to  = [-1,-1]
         this.health = 100;
-        this.armor = 0.5;
-        this.damage = 10; 
+        this.armor = 0.5+(0.25*waveNum);
+        this.damage = 10+(waveNum); 
         this.pathNum = pathnum;
-        this.reward = 1;
+        this.reward = waveNum;
         // console.log(paths)
         // console.log(pathnum)
         this.pathStep = paths[pathnum].length -1
         this.visible = false;
-        this.speedMod = 1;
+        this.speedMod = 1; //ratio of 1 changed by lasers
 
         this.draw = ()=>{
             if((this.to[0]<0)||(this.from[0]<0)){

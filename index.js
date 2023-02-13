@@ -570,6 +570,7 @@ const genGrid = function(){
 
 
 const genEnemies = function(){
+    numEnemies = numEnemies + waveNum*5
     for(var i=0; i<numEnemies; i++){
         var newEn = new Enemy("grunt",floor(random()*numPaths))
         theEnemies.push(newEn)
