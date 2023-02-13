@@ -195,7 +195,8 @@ const drawPopup = function(){
         fillRec(popUpRec,colText([0,0,0,0.75]))
 
         sellButtonRec = [popUpRec[0],popUpRec[1]+popUpRec[3]*0.8,popUpRec[2]/2.2, popUpRec[3]*0.2]
-        fillRec(sellButtonRec,colText([100,100,100,popUpAlpha]))
+        var sellC = (choosingFor.type == "defense")? [100,100,100,popUpAlpha] : [50,50,50,popUpAlpha]
+        fillRec(sellButtonRec,colText(sellC))
 
         cancelButtonRec = [popUpRec[0]+popUpRec[3]-popUpRec[2]/2.2,popUpRec[1]+popUpRec[3]*0.8,popUpRec[2]/2.2, popUpRec[3]*0.2]
         fillRec(cancelButtonRec,colText([100,100,100,popUpAlpha]))
@@ -207,7 +208,11 @@ const drawPopup = function(){
             
             optionsRecs[i] = [opleft,popUpRec[1]+popUpRec[3]*0.35,opwid,popUpRec[3]*0.3]
             var opRec = optionsRecs[i]
-            fillRec(opRec, colText([100,100,100,popUpAlpha])) 
+            var backC = [100,100,100,popUpAlpha]
+            if((gold < prices[i]) ||((options[i]=="repair")&&(prices[i]==0))){
+                backC = [50,50,50,popUpAlpha]
+            }
+            fillRec(opRec, colText(backC)) 
 
             if(options[i] == "basic" || options[i] == "slow"){
                 var col = (options[i] == "basic")? [100,100,0,popUpAlpha] : (options[i] == "slow")? [0,100,100,popUpAlpha] : [255,255,255]
@@ -391,6 +396,10 @@ const click = function(){
                 options=[]
                 waveRunning = true;
             }
+            if(isInside([mdX,mdY],sellButtonRec)&&(choosingFor.type != "defense")){
+                splashText(sellButtonRec[0]+textH/4, sellButtonRec[1]+textH/1.5,"CAN NOT SELL THIS",textH/2,300,[255,0,0])
+
+            }
             
             //option clicked
             for(var i=0; i<options.length; i++){
@@ -464,7 +473,6 @@ const click = function(){
                         towerOptions()
                     }else{
                         console.log("CANNOT AFFORD")
-                        //todo visual indicator
                     }
                 }
             }

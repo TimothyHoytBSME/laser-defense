@@ -178,9 +178,47 @@ const drawTexts = function(){
         ctx.textAlign = 'left'
     }
 
-    //todo draw the splashText from fade que
+    //todo draw the splashText from splash que
+
+    if(drawTexts.splashQue){
+        for(var i = drawTexts.splashQue.length-1; i>=0; i--){
+            var theSplash = drawTexts.splashQue[i]
+            console.log(i,theSplash)
+            var c = [...theSplash[5]]
+            
+            if(!drawTexts.timers){
+                drawTexts.timers = new Array(drawTexts.splashQue.length).fill(0)
+                console.log("created splash timers")
+            }else{
+                
+                drawTexts.timers[i]++
+                console.log(drawTexts.timers)
+            }
+
+            if(drawTexts.timers[i]<theSplash[4]){
+                var alph = 1 - drawTexts.timers[i]/theSplash[4]
+                c.push(alph)
+
+                fillText(theSplash[0],theSplash[1],theSplash[2],theSplash[3],colText(c))
+
+            }else{
+                //remove from splash array
+            }
+        }
+    }
+    
+
 }
 
-const splashText = function(xx,yy,tt, ss,c ){
-    //todo add the event text to the fade que
+const splashText = function(xx,yy,tt, ss, dur,c ){
+    //todo add the event text to the splash que
+    const theSplash = [xx,yy,tt,ss,dur,c]
+    console.log("queing splash", theSplash)
+    if(!drawTexts.splashQue){
+        drawTexts.splashQue = new Array(1).fill(theSplash)
+    }else{
+        drawTexts.splashQue.push(theSplash)
+    }
+
+    drawTexts.timers.push(0)
 }
