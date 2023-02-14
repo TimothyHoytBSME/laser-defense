@@ -144,9 +144,9 @@ class Enemy {
         if(type == "brute"){ this.armor = 1.7+(0.5*(waveNum-1));}
         this.damage = 10+(waveNum); 
         this.pathNum = pathnum;
-        this.reward = waveNum*2;
+        this.reward = waveNum*3;
         if(type == "brute"){
-            this.reward = waveNum*4;
+            this.reward = waveNum*8;
         }
         this.pathStep = paths[pathnum].length -1
         this.visible = false;
