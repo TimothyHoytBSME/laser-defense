@@ -212,7 +212,7 @@ const drawTexts = function(){
                 var alph = 1 - drawTexts.timers[i]/theSplash[4]
                 c.push(alph)
 
-                fillText(theSplash[0],theSplash[1],theSplash[2],theSplash[3],col)
+                fillText(theSplash[0],theSplash[1],theSplash[2],theSplash[3],c)
 
             }else{
                 drawTexts.splashQue.splice(i,1)

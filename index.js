@@ -32,7 +32,7 @@ var numPaths = 2;
 var paths = new Array(numPaths).fill([]); //gets calculated
 var startGold = 60  ;
 var gold = startGold;
-var numEnemies = 25; //gets calculated
+var numEnemies = 20; //gets calculated
 var theEnemies = [];   //gets calculated
 var enemyDelay = 90;
 var startDelay = 100; //500
@@ -585,21 +585,27 @@ const checkRelease = function(){
                     
                 }
                 
-
+                console.log(selected,target)
+                console.log(selected,target,gameGrid)
+                var thesel = gameGrid[selected[0]][selected[1]]
+                var thetar = gameGrid[target[0]][target[1]]
+                console.log()
+                console.log(thesel, "dropped on", thetar)
             }
+
         }
 
         
         target = [-1,-1]
         selected = [-1,-1]
-        
+        console.log('tracking cleared')
     }
 }
 
 const genGrid = function(){
+    console.time('Generating grid')
     lapse = 0
     startTime = new Date()
-    console.log('generating new grid')
     gameGrid = []
     const ranGrid = function(){
         console.log('griddims',gridDims)
@@ -623,7 +629,10 @@ const genGrid = function(){
     genPaths()
 
     genEnemies()
+    console.timeEnd('Generating grid')
+
     saveGame()
+
 }
 
 const genBase = function(){
@@ -679,7 +688,7 @@ const genPaths = function(){
 
 const genEnemies = function(){
     
-    numEnemies = numEnemies + waveNum*5
+    numEnemies = numEnemies + waveNum
     for(var i=0; i<numEnemies; i++){
 
         var type = ((waveNum>1)&& (random()>0.9**waveNum))? "brute" : "grunt"

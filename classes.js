@@ -94,25 +94,28 @@ class Piece {
             if(this.enemies[0] > -1){
                 for(var ei=this.enemies.length -1; ei>=0; ei--){
                     var theenemy = theEnemies[this.enemies[ei]]
-                    if(this.subtype == "basic"){
-                        if(theenemy.health > this.power){
-                            var attackOffset = 0.75;
-                            var hit = (this.power+attackOffset-theenemy.armor)
-                            theenemy.health -= (hit >0)? hit : 0
-                        }else{
-                            theenemy.health = 0
-                            theenemy.destroy()
-                            score+=theenemy.reward
-                            gold+=theenemy.reward
-                            if(ei > 0){
-                                this.enemies.pop()
+                    if(theenemy != undefined){
+                        if(this.subtype == "basic"){
+                            if(theenemy.health > this.power){
+                                var attackOffset = 0.75;
+                                var hit = (this.power+attackOffset-theenemy.armor)
+                                theenemy.health -= (hit >0)? hit : 0
                             }else{
-                                this.enemies[0] = -1
+                                theenemy.health = 0
+                                theenemy.destroy()
+                                score+=theenemy.reward
+                                gold+=theenemy.reward
+                                if(ei > 0){
+                                    this.enemies.pop()
+                                }else{
+                                    this.enemies[0] = -1
+                                }
                             }
+                        }else if(this.subtype == "slow"){
+                            theenemy.speedMod /= (this.power+1.25);
                         }
-                    }else if(this.subtype == "slow"){
-                        theenemy.speedMod /= (this.power+1.25);
                     }
+                    
                 }
             }
         }
@@ -133,7 +136,7 @@ class Enemy {
         this.left = 50;
         this.top = 50;
         this.size = 1;
-        if(type == "brute"){this.size*=1.5}
+        if(type == "brute"){this.size*=1.75}
         this.from = [-1,-1]
         this.to  = [-1,-1]
         this.health = 100;

@@ -199,7 +199,7 @@ const progressBar = function(rect, v, c){
 }
 
 const fillTri = function(p1,p2,p3,c){
-    ctx.fillStyle = c;
+    ctx.fillStyle = colText(c);
     ctx.beginPath()
     ctx.moveTo(p1[0],p1[1])
     ctx.lineTo(p2[0],p2[1])
@@ -312,6 +312,8 @@ onmouseup = (e) => {
         muY = (muY < 0)? 0 : muY;  muY = (muY > brect.bottom*dvp)? brect.bottom*dvp : muY;
         mouseDownCan = false; 
     }
+    mdX = -1;
+    mdY = -1;
     checkRelease();
 }
 
@@ -426,15 +428,18 @@ const sizeCanvas = function(){
         gridSize[1] = gridDims[0]
         marg = gameRec[2]/100;
         size = (gameRec[2]-marg*2)/gridSize[0]
+        gridSizePix = [gridSize[0]*size, gridSize[1]*size]
+        gridPos = [gameCent[0]-gridSizePix[0]/2, gameCent[1]-gridSizePix[1]/2.4]
     }else{
         gridSize[1] = gridDims[1]
         gridSize[0] = gridDims[0]
         marg = gameRec[3]/100;
         size = (gameRec[3]-marg*2)/gridSize[1]
+        gridSizePix = [gridSize[0]*size, gridSize[1]*size]
+        gridPos = [gameCent[0]-gridSizePix[0]/2, gameCent[1]-gridSizePix[1]/2]
     }
 
-    gridSizePix = [gridSize[0]*size, gridSize[1]*size]
-    gridPos = [gameCent[0]-gridSizePix[0]/2, gameCent[1]-gridSizePix[1]/2.4]
+    
     if(!verticalOrien){
         gridPos = [gridPos[0], gridPos[1]]
     }
