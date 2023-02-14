@@ -355,7 +355,7 @@ const onMoveMouse = function(){
                     target = [i,j]
                     piece.isTarget = true;
                 }else{
-                    piece.isTarget = false;
+                    piece.isTarget = false
                 }
             }
         }
@@ -387,6 +387,7 @@ const click = function(){
                     var piece = gameGrid[i][j]
                     if(isInside([mdX,mdY],[piece.left,piece.top,pieceSize,pieceSize])){
                         selected = [i,j]
+                        target = [i,j]
                         piece.isSelected = true;
                     }else{
                         piece.isSelected = false;
@@ -544,29 +545,36 @@ const checkRelease = function(){
         //     soundPlayed = false
         // justScored = true
         if(selected[0]>-1){
+
             var sPiece = gameGrid[selected[0]][selected[1]]
-            if(arrEq(selected, target)&&!(sPiece.type == "path")&&waveRunning){
-                
-                if(choosing == false){
-                    choosing = true;
-                    console.log("opening options for",sPiece)
-                    choosingFor = sPiece
-                    waveRunning = false;
+            console.log(selected,target)
+            
+            sPiece.isSelected = false;
+
+            if(target[0]>-1){
+                gameGrid[target[0]][target[1]].isTarget = false;
+                if(arrEq(selected, target)&&!(sPiece.type == "path")&&waveRunning){
+                    if(choosing == false){
+                        choosing = true;
+                        console.log("opening options for",sPiece)
+                        choosingFor = sPiece
+                        waveRunning = false;
+                    }
+                    
+    
+                    //available option names
+                    towerOptions()
+                    
                 }
                 
 
-                //available option names
-                towerOptions()
-                
             }
-            sPiece.isSelected = false;
-            selected = [-1,-1]
         }
+
         
-        if(target[0]>-1){
-            gameGrid[target[0]][target[1]].isTarget = false;
-            target = [-1,-1]
-        }
+        target = [-1,-1]
+        selected = [-1,-1]
+        
     }
 }
 
