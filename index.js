@@ -61,7 +61,7 @@ const mainLoop = function(){
     
     
     ctx.fillStyle = "rgb(0, 0, 0)"; ctx.fillRect(0, 0, cWidth, cHeight);
-    fillRec(gameRec, colText(backColor))
+    fillRec(gameRec, (backColor))
 
     /////////////////////////draw/////////////////////////
 
@@ -76,9 +76,9 @@ const mainLoop = function(){
         }
 
         drawEnemies()
-
+        findTheEnemies()
         drawLasers()
-
+        doDamages()
         drawPopup()
 
         if(waveRunning){
@@ -95,8 +95,8 @@ const mainLoop = function(){
 
     //////////////////////////////////////////cursor////////////////////////////
     if(!isMobileDevice){
-        fillCir([mX, mY, 12], 'rgba(0,0,0,0.5)')
-        fillCir([mX, mY, 10], 'rgba(255,255,255,0.5)')
+        fillCir([mX, mY, 12], [0,0,0,0.5])
+        fillCir([mX, mY, 10], [255,255,255,0.5])
     }
 
 
@@ -137,12 +137,12 @@ const activateEnemy = function(){
 
         ctx.textAlign = "center"
         ctx.textBaseline = "middle"
-        fillText( gameCent[0], gridPos[1]+textH, "GET READY!", textH/3 , "red")
+        fillText( gameCent[0], gridPos[1]+textH, "GET READY!", textH/3 , [255,0,0])
         ctx.textAlign = "left"
         ctx.textBaseline = "bottom"
 
         var timerRec = [gameCent[0]-gridSizePix[0]/5/2, gridPos[1]+textH*1.5, gridSizePix[0]/5,textH/6 ]
-        progressBar(timerRec, sDelayCount/startDelay,"red")
+        progressBar(timerRec, sDelayCount/startDelay,[255,0,0])
     }
     
     if(eDelayCount>enemyDelay){
@@ -167,6 +167,15 @@ const activateEnemy = function(){
     }
 }
 
+const findTheEnemies = function(){
+    if(waveRunning){
+        for(var i=0; i<theDefences.length; i++){
+            theDefences[i].findEnemies()
+        }
+        theBase.findEnemies()
+    }
+}
+
 const drawEnemies = function(){
     for(var i=0; i<theEnemies.length; i++){
         theEnemies[i].draw()
@@ -177,7 +186,7 @@ const drawEnemies = function(){
         waveRec = [gameCent[0]-textH*4-textH*1.5, gameRec[3]/10+gameRec[1]+textH*1.5, textH*3, textH/10]
     }
     //draw wave progress
-    progressBar(waveRec, theEnemies.length/numEnemies,  colText([0,200,0]))
+    progressBar(waveRec, theEnemies.length/numEnemies,  [0,200,0])
     
 }
 
@@ -189,6 +198,15 @@ const drawLasers = function(){
         theBase.drawLaser()
     }
     
+}
+
+const doDamages = function(){
+    if(waveRunning){
+        for(var i=0; i<theDefences.length; i++){
+            theDefences[i].doDamage()
+        }
+        theBase.doDamage()
+    }
 }
 
 const drawPopup = function(){
@@ -206,17 +224,17 @@ const drawPopup = function(){
     }
 
     if(gameOver){
-        fillRec(popUpRec,colText([0,0,0,0.75]))
+        fillRec(popUpRec,[0,0,0,0.75])
     }
     if(choosing){
-        fillRec(popUpRec,colText([0,0,0,0.75]))
+        fillRec(popUpRec,[0,0,0,0.75])
 
         sellButtonRec = [popUpRec[0],popUpRec[1]+popUpRec[3]*0.8,popUpRec[2]/2.2, popUpRec[3]*0.2]
         var sellC = (choosingFor.type == "defense")? [100,100,100,popUpAlpha] : [50,50,50,popUpAlpha]
-        fillRec(sellButtonRec,colText(sellC))
+        fillRec(sellButtonRec,(sellC))
 
         cancelButtonRec = [popUpRec[0]+popUpRec[3]-popUpRec[2]/2.2,popUpRec[1]+popUpRec[3]*0.8,popUpRec[2]/2.2, popUpRec[3]*0.2]
-        fillRec(cancelButtonRec,colText([100,100,100,popUpAlpha]))
+        fillRec(cancelButtonRec,[100,100,100,popUpAlpha])
 
         optionsRecs = new Array(options.length)
         for(var i=0; i<options.length; i++){
@@ -229,23 +247,23 @@ const drawPopup = function(){
             if((gold < prices[i]) ||((options[i]=="repair")&&(prices[i]==0))){
                 backC = [50,50,50,popUpAlpha]
             }
-            fillRec(opRec, colText(backC)) 
+            fillRec(opRec, (backC)) 
 
             if(options[i] == "basic" || options[i] == "slow"){
                 var col = (options[i] == "basic")? [100,100,0,popUpAlpha] : (options[i] == "slow")? [0,100,100,popUpAlpha] : [255,255,255]
-                fillRec([opRec[0]+opRec[2]/4, opRec[1]+opRec[3]/2-opRec[2]/4, opRec[2]/2,opRec[2]/2],colText([50,50,50,popUpAlpha]))
-                fillCir([opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/2, opRec[2]/6], colText(col)) 
+                fillRec([opRec[0]+opRec[2]/4, opRec[1]+opRec[3]/2-opRec[2]/4, opRec[2]/2,opRec[2]/2],([50,50,50,popUpAlpha]))
+                fillCir([opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/2, opRec[2]/6], (col)) 
             }
             
         }
 
         if((choosingFor.left+pieceSize/2)>gameCent[0]){
-            fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0],popUpRec[1]],[popUpRec[0],popUpRec[1]+popUpRec[3]/4],colText([0,200,0,0.25]))
+            fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0],popUpRec[1]],[popUpRec[0],popUpRec[1]+popUpRec[3]/4],([0,200,0,0.25]))
         }else{
-            fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0]+popUpRec[2],popUpRec[1]],[popUpRec[0]+popUpRec[2],popUpRec[1]+popUpRec[3]/4],colText([0,200,0,0.25]))
+            fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0]+popUpRec[2],popUpRec[1]],[popUpRec[0]+popUpRec[2],popUpRec[1]+popUpRec[3]/4],([0,200,0,0.25]))
         }
-        strokeRec(popUpRec,3,colText([0,200,0,0.25]))
-        fillCir([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2,pieceSize*0.5],colText([0,200,0,0.25]))
+        strokeRec(popUpRec,3,([0,200,0,0.25]))
+        fillCir([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2,pieceSize*0.5],([0,200,0,0.25]))
 
     }
 }

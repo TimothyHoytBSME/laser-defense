@@ -114,49 +114,49 @@ const isEven = function(num){
     return null
 }
 
-// const colEq = function(a,b, tol){
-//     const as = a.length
-//     const bs = b.length
-//     if(as != bs) return false
-//     for(var i=0; i<as; i++){
-//         if(isNaN(a[i])) return false
-//     }
-//     for(var i=0; i<bs; i++){
-//         if(isNaN(b[i])) return false
-//     }
-//     for(var i=0; i<as; i++){
-//         if(abs(round(a[i]) - round(b[i])) > tol) return false
-//     }
-//     return true
-// }
+const colEq = function(a,b, tol){
+    const as = a.length
+    const bs = b.length
+    if(as != bs) return false
+    for(var i=0; i<as; i++){
+        if(isNaN(a[i])) return false
+    }
+    for(var i=0; i<bs; i++){
+        if(isNaN(b[i])) return false
+    }
+    for(var i=0; i<as; i++){
+        if(abs(round(a[i]) - round(b[i])) > tol) return false
+    }
+    return true
+}
 
 
-// const rand255 = function(){
-//     return floor(random()*256)
-// }
+const rand255 = function(){
+    return floor(random()*256)
+}
 
-// const randCol = function(){
-//     return [rand255(),rand255(),rand255()]
-// }
+const randCol = function(){
+    return [rand255(),rand255(),rand255()]
+}
 
-// const colMix = function(a,b){
-//     var c = [0,0,0]
+const colMix = function(a,b){
+    var c = [0,0,0]
     
-//     c[0] = avg(a[0],b[0]);
-//     c[1] = avg(a[1],b[1]);  
-//     c[2] = avg(a[2],b[2]);
+    c[0] = avg(a[0],b[0]);
+    c[1] = avg(a[1],b[1]);  
+    c[2] = avg(a[2],b[2])
 
-//     return c
-// }
+    return c
+}
 
-// const invertCol = function(col){
-//     return [255 - col[0], 255 - col[1], 255 - col[2]]
-// }
+const invertCol = function(col){
+    return [255 - col[0], 255 - col[1], 255 - col[2]]
+}
 
 
 const colText = function(col){
     var CCC = [...col]
-
+    console.log(col)
     if(CCC.length == 3) return 'rgb(' + CCC[0].toString() + ',' + CCC[1].toString() + ',' + CCC[2].toString() +')'
     if(CCC.length == 4) return 'rgba(' + CCC[0].toString() + ',' + CCC[1].toString() + ',' + CCC[2].toString() + ',' + CCC[3].toString() +')'
     console.error('whoops')
@@ -164,16 +164,16 @@ const colText = function(col){
 }
 
 
-const fillCir = function (cir,c){ctx.beginPath(); ctx.arc(cir[0], cir[1], cir[2], 0, 2 * Math.PI, false);ctx.fillStyle = c;  ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(0,0,0,0)';  ctx.stroke();}
+const fillCir = function (cir,c){ctx.beginPath(); ctx.arc(cir[0], cir[1], cir[2], 0, 2 * Math.PI, false);ctx.fillStyle = colText(c);  ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(0,0,0,0)';  ctx.stroke();}
 
 const strokeCir = function(cir,w,c){
-    ctx.beginPath(); ctx.arc(cir[0], cir[1], cir[2], 0, 2 * Math.PI, false);ctx.strokeStyle = c; ctx.lineWidth = w; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cir[0], cir[1], cir[2], 0, 2 * Math.PI, false);ctx.strokeStyle = colText(c); ctx.lineWidth = w; ctx.stroke();
 }
 
 const fillGradCir = function(cir,inner, outer, c1,c2){
     var gradient = ctx.createRadialGradient(cir[0], cir[1], inner, cir[0], cir[1], outer);
-    gradient.addColorStop(0, c1);
-    gradient.addColorStop(1, c2);
+    gradient.addColorStop(0, colText(c1));
+    gradient.addColorStop(1, colText(c2));
 
     ctx.arc(cir[0], cir[1], cir[2], 0, 2*PI);
 
@@ -182,18 +182,19 @@ const fillGradCir = function(cir,inner, outer, c1,c2){
 }
 
 const fillRec = function (rect,c){
-    ctx.fillStyle = c;
+    ctx.fillStyle = colText(c);
     ctx.fillRect(rect[0],rect[1],rect[2],rect[3]);
 }
 
 const strokeRec = function (rect,w,c){
-    ctx.strokeStyle = c;
+    console.log(rect, w, c)
+    ctx.strokeStyle = colText(c);
     ctx.lineWidth = w;
     ctx.strokeRect(rect[0],rect[1],rect[2],rect[3]);
 }
 
 const progressBar = function(rect, v, c){
-    fillRec(rect,colText([100,100,100]))
+    fillRec(rect,[100,100,100])
     fillRec([rect[0],rect[1],rect[2]*v,rect[3]],c)
 }
 
@@ -209,7 +210,7 @@ const fillTri = function(p1,p2,p3,c){
 }
 
 const drawLine = function (from, to, lineWidth, c){
-    ctx.strokeStyle = c;
+    ctx.strokeStyle = colText(c);
     ctx.lineWidth = lineWidth;
 
     ctx.beginPath();
@@ -221,16 +222,16 @@ const drawLine = function (from, to, lineWidth, c){
 
 const fillText = function(xx,yy,tt,ss,c){
     ctx.font = ss.toString() + "px bold arial";
-    ctx.fillStyle = c;
+    ctx.fillStyle = colText(c);
     ctx.fillText(tt, xx, yy);
 }
 
 const shadowText = function(xx,yy,tt,ss,c){
     ctx.font = ss.toString() + "px bold arial";
     ctx.lineWidth = 1
-    ctx.shadowColor = c
+    ctx.shadowColor = colText(c)
     ctx.shadowBlur = 2;
-    ctx.strokeStyle = c;
+    ctx.strokeStyle = colText(c);
     ctx.strokeText(tt, xx, yy);
     ctx.shadowBlur = 0
 }
@@ -238,7 +239,7 @@ const shadowText = function(xx,yy,tt,ss,c){
 const wrapText= function(x, y, text, ss, maxWidth, c){
     var words = text.split(' ');
     var line = '';
-    ctx.fillStyle = c;
+    ctx.fillStyle = colText(c);
     ctx.font = ss.toString() + "px bold arial";
   
     for(var n = 0; n < words.length; n++) {

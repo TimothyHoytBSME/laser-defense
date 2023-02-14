@@ -15,31 +15,28 @@ class Piece {
         this.range = 4;
         this.numLasers = 1;
         this.power = 1
+        this.enemies = new Array([-1])
 
         this.draw = () => {
             
-            this.color = (this.type=="base")? [126*(1-this.health/100),0,123*this.health/100] : (this.type=="defense")? [160,160,160] : (this.type=="path")? [50,50,50]  : this.color
+            this.color = (this.type=="base")? [126*(1-this.health/100),0,123*this.health/100] : 
+                (this.type=="defense")? [160,160,160] : (this.type=="path")? [50,50,50]  : this.color
             var col = this.isSelected? [0,123,0] : this.isTarget? [123,123,0] : this.color
             
-            fillRec([this.left, this.top, pieceSize, pieceSize], colText(col));
+            fillRec([this.left, this.top, pieceSize, pieceSize], col);
             
             if(this.type == "base"){
-                fillRec([this.left, this.top+pieceSize*0.9, pieceSize*this.health/100, pieceSize*0.1], colText([123,255,0]))
-                // strokeCir([this.left+pieceSize/2, this.top+pieceSize/2, pieceSize*this.range], 3, colText(col))
+                fillRec([this.left, this.top+pieceSize*0.9, pieceSize*this.health/100, pieceSize*0.1], [123,255,0])
 
             }
             if(this.type == "defense"){
                 var col = (this.subtype == "basic")? [100,100,0] : (this.subtype == "slow")? [0,100,100] : [255,255,255]
-                fillCir([this.left+pieceSize/2, this.top+pieceSize/2, pieceSize*0.75/2], colText(col))
-                // strokeCir([this.left+pieceSize/2, this.top+pieceSize/2, pieceSize*this.range], 3, colText(col))
+                fillCir([this.left+pieceSize/2, this.top+pieceSize/2, pieceSize*0.75/2], col)
             }
         }
-        this.drawLaser = ()=>{
-            //todo find nearest enemy and qualify
-            //todo draw line to enemy
+        this.findEnemies = ()=>{
             this.enemies = new Array([-1])
 
-            
             var sor = [this.left+pieceSize/2, this.top + pieceSize/2]
             
             for(var li = 0; li<this.numLasers; li++){
@@ -51,13 +48,10 @@ class Piece {
                         var dis = dist(sor,tartar)
                         
                         if(dis <= this.range*pieceSize){
-                            //enemy found
                             if(this.subtype == "slow"){
                                 if(dis<closest){
                                     closest = dis
                                     this.enemies[li] = ei
-                                    // console.log(dis, this.range, pieceSize)
-
                                 }
                             }else{
                                 if(tarPind > theEnemies[ei].pathStep){
@@ -68,9 +62,12 @@ class Piece {
                     }
                 }
             }
+        }
+        this.drawLaser = ()=>{
+            
             
             if(this.enemies[0] > -1){
-
+                var sor = [this.left+pieceSize/2, this.top + pieceSize/2]
                 for(var ei=this.enemies.length -1; ei>=0; ei--){
                     if(this.enemies[ei]<0){
                         console.warn(this.enemies[ei])
@@ -87,8 +84,16 @@ class Piece {
                     if(this.subtype == "slow"){
                         co = [0,200,200,0.8]
                     }
-                    drawLine(sor,tar,sz,colText(co))
-                    
+                    console.log('herereer')
+                    drawLine(sor,tar,sz,co)
+                }
+                
+            }
+        }
+        this.doDamage = function(){
+            if(this.enemies[0] > -1){
+                for(var ei=this.enemies.length -1; ei>=0; ei--){
+                    var theenemy = theEnemies[this.enemies[ei]]
                     if(this.subtype == "basic"){
                         if(theenemy.health > this.power){
                             var attackOffset = 0.75;
@@ -109,9 +114,6 @@ class Piece {
                         theenemy.speedMod /= (this.power+1.25);
                     }
                 }
-                
-                
-
             }
         }
     }
@@ -155,8 +157,9 @@ class Enemy {
             }
 
             if(this.visible){
-                fillRec([this.left, this.top, this.size, this.size], colText(this.color));
-                fillRec([this.left, this.top+this.size*0.9, (this.size)*this.health/100, this.size*0.1], colText([123,255,0]))
+                fillRec([this.left, this.top, this.size, this.size], this.color);
+                fillRec([this.left, this.top+this.size*0.9, (this.size)*this.health/100, this.size*0.1], [123,255,0])
+                strokeRec([this.left, this.top, this.size, this.size], 1, [0,0,0]);
             }
 
         }
