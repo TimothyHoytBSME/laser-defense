@@ -54,7 +54,7 @@ var startPrices = [20,5]
 var lapse = 0;
 var startTime = new Date();
 
-var gameSpeedMult = 2;
+var gameSpeedMult = 1;
 // var gameTime = 0;
 ;
 //Main Animation Loop
