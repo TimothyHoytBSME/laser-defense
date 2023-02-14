@@ -463,6 +463,14 @@ const sizeCanvas = function(){
         }
     }
 
+    for(var i=0; i<theEnemies.length; i++){
+        if(theEnemies[i].type == "brute"){theEnemies[i].size = pieceSize/2*1.25}
+        else{
+            theEnemies[i].size = pieceSize/2
+        }
+        
+    }
+
     
 }
 

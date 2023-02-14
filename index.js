@@ -53,6 +53,8 @@ var popUpAlpha = 0.7
 var startPrices = [20,5]
 var lapse = 0;
 var startTime = new Date();
+
+var gameSpeedMult = 2;
 // var gameTime = 0;
 ;
 //Main Animation Loop
@@ -67,7 +69,7 @@ const mainLoop = function(){
 
     if(gameActive){
         if(waveRunning){
-            lapse = currTime.getTime()/1000 - startTime.getTime()/1000 
+            lapse = (currTime.getTime()/1000 - startTime.getTime()/1000)*gameSpeedMult 
         }
 
         drawBoard()
@@ -131,9 +133,9 @@ const drawBoard = function(){
 
 const activateEnemy = function(){
     if(sDelayCount > startDelay){
-        eDelayCount++
+        eDelayCount+=gameSpeedMult
     }else{
-        sDelayCount++
+        sDelayCount+=gameSpeedMult
 
         ctx.textAlign = "center"
         ctx.textBaseline = "middle"
@@ -149,18 +151,18 @@ const activateEnemy = function(){
         if(activeEnemies < theEnemies.length){
             activeEnemies++
             var activatedEnemy = theEnemies[activeEnemies-1]
-            // activatedEnemy.left = (200+10*activeEnemies)
-            // activatedEnemy.top = (100+20*activeEnemies)
-            // console.log('activating', activatedEnemy)
-            // console.log('its path', activatedEnemy.pathNum)
             var activePath = [...paths[activatedEnemy.pathNum]]
             var startP = activePath[activePath.length -1]
             var nextP = activePath[activePath.length -2]
             activatedEnemy.from = [...startP]
             activatedEnemy.to = [...nextP]
-            // console.log(activatedEnemy.to)
-            activatedEnemy.left = gameGrid[startP[0]][startP[1]].left+pieceSize/4
-            activatedEnemy.top = gameGrid[startP[0]][startP[1]].top+ pieceSize/4
+
+            var enMarg = (pieceSize - activatedEnemy.size)/2
+
+            activatedEnemy.left = gameGrid[startP[0]][startP[1]].left + enMarg
+            activatedEnemy.top = gameGrid[startP[0]][startP[1]].top + enMarg
+
+            
 
         }
         eDelayCount = 0
@@ -629,6 +631,8 @@ const genGrid = function(){
     genPaths()
 
     genEnemies()
+
+    sizeCanvas()
     console.timeEnd('Generating grid')
 
     saveGame()

@@ -98,7 +98,7 @@ class Piece {
                         if(this.subtype == "basic"){
                             if(theenemy.health > this.power){
                                 var attackOffset = 0.75;
-                                var hit = (this.power+attackOffset-theenemy.armor)
+                                var hit = (this.power+attackOffset-theenemy.armor)*gameSpeedMult
                                 theenemy.health -= (hit >0)? hit : 0
                             }else{
                                 theenemy.health = 0
@@ -133,15 +133,15 @@ class Enemy {
         if(type == "brute"){
             this.speed*=0.6
         }
-        this.left = 50;
-        this.top = 50;
-        this.size = 1;
-        if(type == "brute"){this.size*=1.75}
-        this.from = [-1,-1]
+        this.left = 0;
+        this.top = 0;
+        this.size = 500;
+        if(type == "brute"){this.size = 500}
+        this.from = [-1,-1] 
         this.to  = [-1,-1]
         this.health = 100;
         this.armor = 1.5 +0.075*(waveNum-1);
-        if(type == "brute"){ this.armor = 1.7+(0.075*(waveNum-1));}
+        if(type == "brute"){ this.armor = 1.7+(0.5*(waveNum-1));}
         this.damage = 10+(waveNum); 
         this.pathNum = pathnum;
         this.reward = waveNum;
@@ -150,7 +150,8 @@ class Enemy {
         this.speedMod = 1; //ratio of 1 changed by lasers
 
         this.draw = ()=>{
-            this.size =pieceSize/2;
+            // this.size =pieceSize/2;
+            
             if((this.to[0]<0)||(this.from[0]<0)){
                 if(this.visible){
                     this.visible = false
@@ -160,37 +161,38 @@ class Enemy {
             }
 
             if(this.visible){
-                fillRec([this.left, this.top, this.size, this.size], this.color);
-                fillRec([this.left, this.top+this.size*0.9, (this.size)*this.health/100, this.size*0.1], [123,255,0])
-                strokeRec([this.left, this.top, this.size, this.size], 1, [0,0,0]);
+                
+                console.log(this.size)
+                var enRec = [this.left, this.top, this.size, this.size]
+                // if(this.type == "brute"){
+                //     var enRec = [this.left, this.top, this.size, this.size]
+                // }
+                fillRec(enRec, this.color);
+                fillRec([enRec[0], enRec[1]+enRec[3]*0.9, enRec[2]*this.health/100, enRec[3]*0.1], [123,255,0])
+                strokeRec(enRec, 1, [0,0,0]);
             }
 
         }
         this.move = ()=>{
-            var dir = [ this.to[0]-this.from[0] , this.to[1] - this.from[1]  ]
+            if(this.from[0] >-1){
+                var dir = [ this.to[0]-this.from[0] , this.to[1] - this.from[1]  ]
             var spDir = dir
             if(verticalOrien){
                 spDir = [ -spDir[1], spDir[0]]
             }
 
-            this.left= this.left + this.speed*spDir[0]*pieceSize*this.speedMod
-            this.top= this.top + this.speed*spDir[1]*pieceSize*this.speedMod
+            
+
+            this.left= this.left + this.speed*spDir[0]*pieceSize*this.speedMod*gameSpeedMult
+            this.top= this.top + this.speed*spDir[1]*pieceSize*this.speedMod*gameSpeedMult
             this.speedMod = 1;
 
             if(this.to[0]>-1){
                 var destPiece = gameGrid[this.to[0]][this.to[1]]
-                var pastLeft = spDir[0]*((destPiece.left + this.size) - (this.left + this.size/2)) <= 0
-                var pastTop = spDir[1]*((destPiece.top + this.size) - (this.top + this.size/2)) <= 0
-
-                if(pastLeft){
-                    this.left = destPiece.left + this.size/2
-                }
-                if(pastTop){
-                    this.top = destPiece.top + this.size/2
-                }
+                var pastLeft = ((spDir[0]*((destPiece.left + pieceSize/2) - (this.left + this.size/2)) )<= 0)
+                var pastTop = ((spDir[1]*((destPiece.top + pieceSize/2) - (this.top + this.size/2))) <= 0)
 
                 if(pastLeft&&pastTop){
-        
                     this.pathStep = this.pathStep - 1;
                     if(this.pathStep < - 0){
                         //hit base
@@ -212,8 +214,9 @@ class Enemy {
                     }
                     
                 }
-                // console.log('moving', dir, this.speed, this.left, this.top)
             }
+            }
+            
             
         }
         this.destroy = ()=>{
@@ -224,10 +227,10 @@ class Enemy {
             this.top = 0;
             activeEnemies--
             theEnemies.splice(theEnemies.indexOf(this),1)
-            // console.log("enemy removed", theEnemies)
             if(theEnemies.length == 0){
                 waveNum++
                 genEnemies()
+                sizeCanvas()
                 eDelayCount = 0
                 sDelayCount = 0;
 
