@@ -37,6 +37,18 @@ const drawTexts = function(){
             shadowText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1]+textH, waveNum.toString(), textH*0.75, [0,0,0])
             fillText(gameCent[0]-textH*4, gameRec[3]/10+gameRec[1]+textH, waveNum.toString(), textH*0.75, [255,255,255])
 
+            var speedCol = [255,255,255]
+            if(gameSpeedMult == 2){
+                speedCol = [0,255,0]
+            }
+            doubletimeRec = [gameCent[0]-textH*4.4, gameRec[3]/20+gameRec[1], textH, textH*0.75]
+            ctx.textAlign = "left"
+            ctx.textBaseline = "top"
+            fillText(doubletimeRec[0],doubletimeRec[1], ">>", textH*0.75, speedCol)
+            ctx.textAlign = "center"
+            ctx.textBaseline = "middle"
+            // strokeRec(doubletimeRec,2,[255,255,255])
+
         }else{
             shadowText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*3, "SCORE", textH*0.75, [0,0,0])
             fillText(gameRec[2]/13+gameRec[0], gameCent[1]-textH*3, "SCORE", textH*0.75, [255,255,255])
@@ -52,6 +64,18 @@ const drawTexts = function(){
             fillText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*3, "WAVE", textH*0.75, [255,255,255])
             shadowText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*2, waveNum.toString(), textH*0.75, [0,0,0])
             fillText(-gameRec[2]/13+gameRec[0]+gameRec[2], gameCent[1]-textH*2, waveNum.toString(), textH*0.75, [255,255,255])
+
+            var speedCol = [255,255,255]
+            if(gameSpeedMult == 2){
+                speedCol = [0,255,0]
+            }
+            doubletimeRec = [-gameRec[2]/10.25+gameRec[0]+gameRec[2], gameCent[1]-textH*4.25, textH, textH*0.75]
+            ctx.textAlign = "left"
+            ctx.textBaseline = "top"
+            fillText(doubletimeRec[0],doubletimeRec[1], ">>", textH*0.75, speedCol)
+            ctx.textAlign = "center"
+            ctx.textBaseline = "middle"
+            // strokeRec(doubletimeRec,2,[255,255,255])
         }
         ctx.textAlign = "left"
         ctx.textBaseline = 'bottom'

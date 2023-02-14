@@ -98,7 +98,7 @@ class Piece {
                         if(this.subtype == "basic"){
                             if(theenemy.health > this.power){
                                 var attackOffset = 0.75;
-                                var hit = (this.power+attackOffset-theenemy.armor)*gameSpeedMult
+                                var hit = (this.power+attackOffset-theenemy.armor)*gameSpeedMult/2
                                 theenemy.health -= (hit >0)? hit : 0
                             }else{
                                 theenemy.health = 0
@@ -144,7 +144,10 @@ class Enemy {
         if(type == "brute"){ this.armor = 1.7+(0.5*(waveNum-1));}
         this.damage = 10+(waveNum); 
         this.pathNum = pathnum;
-        this.reward = waveNum;
+        this.reward = waveNum*2;
+        if(type == "brute"){
+            this.reward = waveNum*4;
+        }
         this.pathStep = paths[pathnum].length -1
         this.visible = false;
         this.speedMod = 1; //ratio of 1 changed by lasers

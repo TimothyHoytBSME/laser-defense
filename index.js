@@ -18,6 +18,7 @@ var gameGrid = [] //gets calculated
 var newButtonRec = [] //gets calculated
 var menuButtonRec = [] //gets calculated
 var sellButtonRec = [] //gets calculated
+var doubletimeRec = [] //gets calculated
 
 var cancelButtonRec = [] //gets calculated
 var optionsRecs = [] //gets calculated
@@ -30,7 +31,7 @@ var gridSizePix = [1,1] //gets calculated
 var gridPos = [10,10] //gets calculated
 var numPaths = 2;
 var paths = new Array(numPaths).fill([]); //gets calculated
-var startGold = 60  ;
+var startGold = 100  ;
 var gold = startGold;
 var numEnemies = 20; //gets calculated
 var theEnemies = [];   //gets calculated
@@ -414,6 +415,17 @@ const click = function(){
                     }
                 }
             }
+            
+            if(isInside([mdX,mdY],doubletimeRec)){
+                console.warn('gamespeedchanged')
+                if(gameSpeedMult == 2){
+                    gameSpeedMult = 1
+                }else{
+                    gameSpeedMult = 2
+                }
+            }
+
+            
         }else if(!gameOver){
             //popup clicked
             if(isInside([mdX,mdY],cancelButtonRec)||(!isInside([mdX,mdY],popUpRec)&&!isInside([mdX,mdY],menuButtonRec))){
