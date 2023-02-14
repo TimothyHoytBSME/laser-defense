@@ -84,7 +84,7 @@ class Piece {
                     if(this.subtype == "slow"){
                         co = [0,200,200,0.8]
                     }
-                    console.log('herereer')
+                    // console.log('herereer')
                     drawLine(sor,tar,sz,co)
                 }
                 

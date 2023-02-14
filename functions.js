@@ -156,11 +156,11 @@ const invertCol = function(col){
 
 const colText = function(col){
     var CCC = [...col]
-    console.log(col)
+    // console.log(col)
     if(CCC.length == 3) return 'rgb(' + CCC[0].toString() + ',' + CCC[1].toString() + ',' + CCC[2].toString() +')'
     if(CCC.length == 4) return 'rgba(' + CCC[0].toString() + ',' + CCC[1].toString() + ',' + CCC[2].toString() + ',' + CCC[3].toString() +')'
     console.error('whoops')
-    return 'rgb(255,255,255)'
+    return 'rgb(255,100,100)'
 }
 
 
@@ -187,7 +187,7 @@ const fillRec = function (rect,c){
 }
 
 const strokeRec = function (rect,w,c){
-    console.log(rect, w, c)
+    // console.log(rect, w, c)
     ctx.strokeStyle = colText(c);
     ctx.lineWidth = w;
     ctx.strokeRect(rect[0],rect[1],rect[2],rect[3]);
