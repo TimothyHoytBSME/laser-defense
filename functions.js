@@ -192,6 +192,11 @@ const strokeRec = function (rect,w,c){
     ctx.strokeRect(rect[0],rect[1],rect[2],rect[3]);
 }
 
+const progressBar = function(rect, v, c){
+    fillRec(rect,colText([100,100,100]))
+    fillRec([rect[0],rect[1],rect[2]*v,rect[3]],c)
+}
+
 const fillTri = function(p1,p2,p3,c){
     ctx.fillStyle = c;
     ctx.beginPath()
@@ -428,7 +433,7 @@ const sizeCanvas = function(){
     }
 
     gridSizePix = [gridSize[0]*size, gridSize[1]*size]
-    gridPos = [gameCent[0]-gridSizePix[0]/2, gameCent[1]-gridSizePix[1]/2]
+    gridPos = [gameCent[0]-gridSizePix[0]/2, gameCent[1]-gridSizePix[1]/2.4]
     if(!verticalOrien){
         gridPos = [gridPos[0], gridPos[1]]
     }

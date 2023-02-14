@@ -163,6 +163,19 @@ const drawTexts = function(){
             ctx.textBaseline = 'bottom'
         }
 
+        ctx.textAlign = "right"
+        //gameTime
+        var secText = ((lapse%60).toFixed(1)).toString()
+        if(lapse%60<=9.95){
+            secText = "0"+secText
+        }
+        fillText(gameRec[0]+gameRec[2]-textH*0.25,gameRec[1]+textH*1.25, secText,textH,colText([200,200,200]))
+        if(lapse > 60){
+            var minText = ((lapse - lapse%60)/60).toString() + ":";
+            
+            fillText(gameRec[0]+gameRec[2]-textH*2.1,gameRec[1]+textH*1.25, minText,textH,colText([200,200,200]))
+        }
+        ctx.textAlign = "left"
     }else{
         //paused
         returnButtonRec = [gameRec[0]+gameRec[2]-textXoff*5-textW, gameRec[1]+gameRec[3]-textH, textW*2, textH]
@@ -183,7 +196,7 @@ const drawTexts = function(){
     if(drawTexts.splashQue){
         for(var i = drawTexts.splashQue.length-1; i>=0; i--){
             var theSplash = drawTexts.splashQue[i]
-            console.log(i,theSplash)
+            // console.log(i,theSplash)
             var c = [...theSplash[5]]
             
             if(!drawTexts.timers){
@@ -192,7 +205,7 @@ const drawTexts = function(){
             }else{
                 
                 drawTexts.timers[i]++
-                console.log(drawTexts.timers)
+                // console.log(drawTexts.timers)
             }
 
             if(drawTexts.timers[i]<theSplash[4]){
@@ -202,7 +215,9 @@ const drawTexts = function(){
                 fillText(theSplash[0],theSplash[1],theSplash[2],theSplash[3],colText(c))
 
             }else{
-                //remove from splash array
+                drawTexts.splashQue.splice(i,1)
+                drawTexts.timers.splice(i,1)
+                i--
             }
         }
     }
@@ -213,11 +228,16 @@ const drawTexts = function(){
 const splashText = function(xx,yy,tt, ss, dur,c ){
     //todo add the event text to the splash que
     const theSplash = [xx,yy,tt,ss,dur,c]
-    console.log("queing splash", theSplash)
+    // console.log("queing splash", theSplash)
     if(!drawTexts.splashQue){
         drawTexts.splashQue = new Array(1).fill(theSplash)
     }else{
         drawTexts.splashQue.push(theSplash)
+    }
+
+    if(!drawTexts.timers){
+        drawTexts.timers = new Array(drawTexts.splashQue.length).fill(0)
+        console.log("created splash timers")
     }
 
     drawTexts.timers.push(0)

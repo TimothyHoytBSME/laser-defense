@@ -3,7 +3,7 @@ class Piece {
         this.type = type
         this.cost = 0;
         this.subtype = "basic"
-        this.color = [40,40,40]
+        this.color = [5,5,5]
         this.left = 0;
         this.top = 0;
         this.px = i;
@@ -18,7 +18,7 @@ class Piece {
 
         this.draw = () => {
             
-            this.color = (this.type=="base")? [126*(1-this.health/100),0,123*this.health/100] : (this.type=="defense")? [160,160,160] : (this.type=="path")? [123, 123, 123]  : [40,40,40]
+            this.color = (this.type=="base")? [126*(1-this.health/100),0,123*this.health/100] : (this.type=="defense")? [160,160,160] : (this.type=="path")? [50,50,50]  : this.color
             var col = this.isSelected? [0,123,0] : this.isTarget? [123,123,0] : this.color
             
             fillRec([this.left, this.top, pieceSize, pieceSize], colText(col));
@@ -79,9 +79,10 @@ class Piece {
                     }
                     var theenemy = theEnemies[this.enemies[ei]]
                     var tar = [theenemy.left+pieceSize/4, theenemy.top + pieceSize/4]
-                    var sz = 3; var co = [200,180,0,0.8]
+                    var sz = 3+this.power; 
+                    var co = [200,180,0,0.8]
                     if(this.type == "base"){
-                        sz = 5; co = [200,123,50,0.8]
+                        co = [200,123,50,0.8]
                     }
                     if(this.subtype == "slow"){
                         co = [0,200,200,0.8]
@@ -90,7 +91,9 @@ class Piece {
                     
                     if(this.subtype == "basic"){
                         if(theenemy.health > this.power){
-                            theenemy.health -= (this.power-theenemy.armor >0)? (this.power - theenemy.armor) : 0
+                            var attackOffset = 0.75;
+                            var hit = (this.power+attackOffset-theenemy.armor)
+                            theenemy.health -= (hit >0)? hit : 0
                         }else{
                             theenemy.health = 0
                             theenemy.destroy()
@@ -115,29 +118,28 @@ class Piece {
 }
 
 class Enemy { 
-    constructor(type, pathnum, ss){
+    constructor(type, pathnum){
         this.type = type
         this.color = [123,0,0]
         if(type == "brute"){
             this.color = [123, 160, 10]
         }
-        this.speed = 0.02 + 0.01*waveNum;
+        this.speed = 0.01 + 0.01*waveNum;
         if(type == "brute"){
             this.speed*=0.6
         }
         this.left = 50;
         this.top = 50;
         this.size = 1;
+        if(type == "brute"){this.size*=1.5}
         this.from = [-1,-1]
         this.to  = [-1,-1]
         this.health = 100;
-        this.armor = 0.5+(0.25*waveNum);
-        if(type == "brute"){ this.armor*=3;}
+        this.armor = 1.5 +0.075*(waveNum-1);
+        if(type == "brute"){ this.armor = 1.7+(0.075*(waveNum-1));}
         this.damage = 10+(waveNum); 
         this.pathNum = pathnum;
         this.reward = waveNum;
-        // console.log(paths)
-        // console.log(pathnum)
         this.pathStep = paths[pathnum].length -1
         this.visible = false;
         this.speedMod = 1; //ratio of 1 changed by lasers

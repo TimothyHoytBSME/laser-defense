@@ -34,7 +34,7 @@ const ctx = canvas.getContext("2d");
 //     // }
 // }
 
-const startTime = new Date();
+
 
 var isTouchDevice = false;
 var isMobileDevice = false;

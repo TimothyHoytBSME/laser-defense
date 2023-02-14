@@ -3,7 +3,7 @@ const Version = "1.0-alpha-laserdefense"
 
 
 var backColor = [20,20,20];
-var gridDims = [15,13]
+var gridDims = [13,11]
 
 
 var gridSize = [1,1] //gets calculated
@@ -30,11 +30,11 @@ var gridSizePix = [1,1] //gets calculated
 var gridPos = [10,10] //gets calculated
 var numPaths = 2;
 var paths = new Array(numPaths).fill([]); //gets calculated
-var startGold = 40  ;
+var startGold = 60  ;
 var gold = startGold;
-var numEnemies = 50; //gets calculated
+var numEnemies = 25; //gets calculated
 var theEnemies = [];   //gets calculated
-var enemyDelay = 50;
+var enemyDelay = 90;
 var startDelay = 100; //500
 var eDelayCount = 0;    //gets calculated
 var sDelayCount = 0;
@@ -51,17 +51,25 @@ var options = [] //gets calculated
 var prices = new Array(10).fill(0) //gets calculated
 var popUpAlpha = 0.7 
 var startPrices = [20,5]
-
+var lapse = 0;
+var startTime = new Date();
+// var gameTime = 0;
+;
 //Main Animation Loop
 const mainLoop = function(){
     const currTime = new Date();
-    const lapse = currTime - startTime
+    
+    
     ctx.fillStyle = "rgb(0, 0, 0)"; ctx.fillRect(0, 0, cWidth, cHeight);
     fillRec(gameRec, colText(backColor))
 
     /////////////////////////draw/////////////////////////
 
     if(gameActive){
+        if(waveRunning){
+            lapse = currTime.getTime()/1000 - startTime.getTime()/1000 
+        }
+
         drawBoard()
         if(waveRunning){
             activateEnemy()
@@ -108,7 +116,8 @@ const mainLoop = function(){
 
     //////////////////////////////next frame////////////////////////////////
     window.requestAnimationFrame(mainLoop);
-    dlastLapse = lapse;
+    // dlastLapse = lapse;
+
 }
 
 const drawBoard = function(){
@@ -125,6 +134,7 @@ const activateEnemy = function(){
         eDelayCount++
     }else{
         sDelayCount++
+
         ctx.textAlign = "center"
         ctx.textBaseline = "middle"
         fillText( gameCent[0], gridPos[1]+textH, "GET READY!", textH/3 , "red")
@@ -132,8 +142,7 @@ const activateEnemy = function(){
         ctx.textBaseline = "bottom"
 
         var timerRec = [gameCent[0]-gridSizePix[0]/5/2, gridPos[1]+textH*1.5, gridSizePix[0]/5,textH/6 ]
-        fillRec(timerRec,colText([100,100,100]))
-        fillRec([timerRec[0],timerRec[1],timerRec[2]*sDelayCount/startDelay,timerRec[3]],"red")
+        progressBar(timerRec, sDelayCount/startDelay,"red")
     }
     
     if(eDelayCount>enemyDelay){
@@ -162,6 +171,14 @@ const drawEnemies = function(){
     for(var i=0; i<theEnemies.length; i++){
         theEnemies[i].draw()
     }
+
+    var waveRec = [  -gameRec[2]/13+gameRec[0]+gameRec[2]-textH*1.5, gameCent[1]-textH*1.5 , textH*3  ,  textH/10 ]
+    if(verticalOrien){
+        waveRec = [gameCent[0]-textH*4-textH*1.5, gameRec[3]/10+gameRec[1]+textH*1.5, textH*3, textH/10]
+    }
+    //draw wave progress
+    progressBar(waveRec, theEnemies.length/numEnemies,  colText([0,200,0]))
+    
 }
 
 const drawLasers = function(){
@@ -258,13 +275,13 @@ const towerOptions = function(){
     for (var i = 0; i< options.length; i++){
         switch(options[i]){
             case "upgrade1": //laserCount
-                prices[i] = choosingFor.cost
+                prices[i] = choosingFor.cost*2
                 break;
             case "upgrade2": //power
-                prices[i] = floor(choosingFor.cost/2)
+                prices[i] = floor(choosingFor.cost*1.75)
                 break;
             case "upgrade3": //range
-                prices[i] = floor(choosingFor.cost*1.5)
+                prices[i] = floor(choosingFor.cost/2)
                 break;
             case "slow":    //build or change
                 prices[i] = (choosingFor.type == "empty")? startPrices[1] : floor(choosingFor.cost/(startPrices[0]/startPrices[1]))
@@ -349,7 +366,7 @@ const onMoveMouse = function(){
 
 const click = function(){
     if(gameActive){
-
+        
 
         if(isInside([mdX,mdY],newButtonRec)){
             console.log("new clicked")
@@ -390,27 +407,33 @@ const click = function(){
                 console.log('sell clicked')
                 gold+=choosingFor.cost/2;
                 choosingFor.type = "empty"
+                choosingFor.color = [5,5,5]
                 theDefences.splice(theDefences.indexOf(choosingFor),1)
+
+
                 choosingFor = null
 
                 options=[]
                 waveRunning = true;
             }
-            if(isInside([mdX,mdY],sellButtonRec)&&(choosingFor.type != "defense")){
-                splashText(sellButtonRec[0]+textH/4, sellButtonRec[1]+textH/1.5,"CAN NOT SELL THIS",textH/2,300,[255,0,0])
-
+            if(choosingFor){
+                if(isInside([mdX,mdY],sellButtonRec)&&(choosingFor.type != "defense")){
+                    splashText(sellButtonRec[0]+textH/4, sellButtonRec[1]+textH/1.5,"CAN NOT SELL THIS",textH/2,100,[255,0,0])
+    
+                }
             }
+            
             
             //option clicked
             // console.log('checking options', options, optionsRecs)
             var done = false
             for(var i=0; i<options.length; i++){
                 if(!done){
-                    console.log('checking', i)
-                    console.log(options,optionsRecs)
+                    // console.log('checking', i)
+                    // console.log(options,optionsRecs)
                     
                     if((optionsRecs[i])&&isInside([mdX,mdY],optionsRecs[i])){
-                        console.log('option '+i.toString()+" clicked")
+                        // console.log('option '+i.toString()+" clicked")
                         var thePrice = prices[i]
 
                         if(gold >= thePrice){
@@ -423,31 +446,38 @@ const click = function(){
                                     choosingFor.subtype = "basic"
                                     choosingFor.cost = startPrices[0]
                                     theDefences.push(choosingFor)
+                                    console.log('built tower ',choosingFor.subtype)
+
                                 }else if(options[i] == "slow"){
                                     choosingFor.type = "defense"
                                     choosingFor.subtype = "slow"
                                     choosingFor.numLasers = 3;
                                     choosingFor.cost = startPrices[1]
                                     theDefences.push(choosingFor)
+                                    console.log('built tower ',choosingFor.subtype)
                                 }
                             }else if(choosingFor.type == "defense"){
                                 if(options[i] == "upgrade1"){
                                     choosingFor.numLasers++
                                     choosingFor.cost += thePrice
-                                    console.log("dfghmfghjmghk,")
+                                    console.log('upgraded laser count',choosingFor)
+
                                 }else if(options[i] == "upgrade2"){
-                                    if(choosingFor.subtype == "slow"){
-                                        choosingFor.power++
-                                    }else{
-                                        choosingFor.power++
-                                    }
+                                    choosingFor.power++
+                                    console.log('upgraded tower power',choosingFor)
+
                                     choosingFor.cost += thePrice
                                 }else if(options[i] == "upgrade3"){
                                     choosingFor.range++
                                     choosingFor.cost += thePrice
+                                    console.log('upgraded tower range',choosingFor)
+
                                 }else if(options[i] == "slow"){
+                                    var lastSub = choosingFor.subtype
                                     choosingFor.subtype = "slow"
                                     choosingFor.cost = thePrice
+                                    console.log('changed tower',choosingFor.subtype,lastSub)
+
                                 }else if(options[i] == "basic"){
                                     choosingFor.subtype = "basic"
                                     choosingFor.cost = thePrice
@@ -455,19 +485,22 @@ const click = function(){
                                 }
                             }else if(choosingFor.type == "base"){
                                 if(options[i] == "repair"){
-                                    console.log('repairing base')
+                                    console.log('repairing base', thePrice)
                                     
                                     theBase.health+= thePrice
                                     
                                 }if(options[i] == "upgrade1"){
                                     choosingFor.numLasers ++
                                     choosingFor.cost += thePrice
+                                    console.log('upgraded laser count',choosingFor)
                                 }else if(options[i] == "upgrade2"){
                                     choosingFor.power++
                                     choosingFor.cost += thePrice
+                                    console.log('upgraded tower power',choosingFor)
                                 }else if(options[i] == "upgrade3"){
                                     choosingFor.range++
                                     choosingFor.cost += thePrice
+                                    console.log('upgraded tower range',choosingFor)
                                 }
                             }
                             
@@ -475,6 +508,7 @@ const click = function(){
                             
                             console.log("option "+options[i]+" purchased for " + prices[i])
                             console.log("purchase for:", choosingFor)
+
                             gold -= prices [i]
 
                             options=[]
@@ -482,6 +516,11 @@ const click = function(){
                             towerOptions()
                         }else{
                             console.log("CANNOT AFFORD")
+                            if(optionsRecs[i]){
+                                splashText(optionsRecs[i][0]+optionsRecs[i][2]/5, optionsRecs[i][1]+textH*1.1,"GOLD",textH/2,50,[255,0,0])
+
+                            }
+
                         }
                     }
                 }
@@ -532,7 +571,8 @@ const checkRelease = function(){
 }
 
 const genGrid = function(){
-
+    lapse = 0
+    startTime = new Date()
     console.log('generating new grid')
     gameGrid = []
     const ranGrid = function(){
@@ -552,7 +592,7 @@ const genGrid = function(){
 
     ranGrid()
 
-    makeBase()
+    genBase()
     
     genPaths()
 
@@ -560,12 +600,13 @@ const genGrid = function(){
     saveGame()
 }
 
-const makeBase = function(){
+const genBase = function(){
     var baseP = [floor(gridDims[0]/2),floor(gridDims[1]/2)]//[floor(random()*gridDims[0]),floor(random()*gridDims[1])]
     
     theBase = gameGrid[baseP[0]][baseP[1]]
     theBase.type = "base"
     theBase.cost = 100
+    // theBase.power = 2;
 }
 
 const genPaths = function(){
@@ -616,6 +657,10 @@ const genEnemies = function(){
     for(var i=0; i<numEnemies; i++){
 
         var type = ((waveNum>1)&& (random()>0.9**waveNum))? "brute" : "grunt"
+        if ( i == numEnemies -1){
+            type = "brute"
+        }      
+       // type = "brute" //debug  
         var pathnum = floor(random()*numPaths)
         var newEn = new Enemy(type,pathnum)
         theEnemies.push(newEn)
