@@ -1,3 +1,9 @@
+
+/////////////////////////////////
+//overlay text draw calls only
+///////////////////////////////
+
+//Class of object to be stored as tile object in gamegrid
 class Piece {
     constructor(i, j, type) {
         this.type = type
@@ -122,6 +128,7 @@ class Piece {
     }
 }
 
+//class of object to be array of current theEnemies
 class Enemy { 
     constructor(type, pathnum){
         this.type = type

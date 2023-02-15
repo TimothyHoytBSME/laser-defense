@@ -118,8 +118,13 @@ const mainLoop = function(){
     }
 
     //////////////////////////////next frame////////////////////////////////
-    window.requestAnimationFrame(mainLoop);
-    // dlastLapse = lapse;
+    const fpsMax = 25;
+
+    setTimeout(() => {
+        window.requestAnimationFrame(mainLoop);
+    }, 1000 / fpsMax);
+
+    // window.requestAnimationFrame(mainLoop);
 
 }
 
@@ -720,3 +725,54 @@ const genEnemies = function(){
 
     console.log('enemies', theEnemies)
 }
+
+
+//Sends to functions.js for execution upon resize
+externalResizeFunctions.push(()=>{
+    if(verticalOrien){
+        gridSize[0] = gridDims[1]
+        gridSize[1] = gridDims[0]
+        marg = gameRec[2]/100;
+        size = (gameRec[2]-marg*2)/gridSize[0]
+        gridSizePix = [gridSize[0]*size, gridSize[1]*size]
+        gridPos = [gameCent[0]-gridSizePix[0]/2, gameCent[1]-gridSizePix[1]/2.4]
+    }else{
+        gridSize[1] = gridDims[1]
+        gridSize[0] = gridDims[0]
+        marg = gameRec[3]/100;
+        size = (gameRec[3]-marg*2)/gridSize[1]
+        gridSizePix = [gridSize[0]*size, gridSize[1]*size]
+        gridPos = [gameCent[0]-gridSizePix[0]/2, gameCent[1]-gridSizePix[1]/2]
+    }
+
+    
+    if(!verticalOrien){
+        gridPos = [gridPos[0], gridPos[1]]
+    }
+    pieceSize = size-marg;
+
+
+    for(var i = 0; i<gridSize[0]; i++){
+        for(var j = 0; j<gridSize[1]; j++){
+            if(verticalOrien){
+                pX = j
+                pY = gridSize[0]-i-1
+            }else{
+                pX = i
+                pY = j
+                
+            }
+            var piece = gameGrid[pX][pY]
+            piece.left = gridPos[0]+i*size+marg/2
+            piece.top = gridPos[1]+j*size+marg/2
+            console.log('calculated grid positions')
+        }
+    }
+    for(var i=0; i<theEnemies.length; i++){
+        if(theEnemies[i].type == "brute"){theEnemies[i].size = pieceSize/2*1.25}
+        else{
+            theEnemies[i].size = pieceSize/2
+        }
+        
+    }
+})
