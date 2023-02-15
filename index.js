@@ -118,7 +118,7 @@ const mainLoop = function(){
     }
 
     //////////////////////////////next frame////////////////////////////////
-    const fpsMax = 25;
+    const fpsMax = 60;
 
     setTimeout(() => {
         window.requestAnimationFrame(mainLoop);
@@ -584,7 +584,7 @@ const checkRelease = function(){
         if(selected[0]>-1){
 
             var sPiece = gameGrid[selected[0]][selected[1]]
-            console.log(selected,target)
+            console.log("selected",selected)
             
             sPiece.isSelected = false;
 
@@ -597,27 +597,21 @@ const checkRelease = function(){
                         choosingFor = sPiece
                         waveRunning = false;
                     }
-                    
-    
                     //available option names
                     towerOptions()
-                    
                 }
                 
-                console.log(selected,target)
-                console.log(selected,target,gameGrid)
+                console.log("drag",selected,target)
                 var thesel = gameGrid[selected[0]][selected[1]]
                 var thetar = gameGrid[target[0]][target[1]]
-                console.log()
                 console.log(thesel, "dropped on", thetar)
             }
 
         }
-
         
         target = [-1,-1]
         selected = [-1,-1]
-        console.log('tracking cleared')
+        // console.log('tracking cleared')
     }
 }
 

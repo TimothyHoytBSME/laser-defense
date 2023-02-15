@@ -172,7 +172,7 @@ class Enemy {
 
             if(this.visible){
                 
-                console.log(this.size)
+                // console.log(this.size)
                 var enRec = [this.left, this.top, this.size, this.size]
                 // if(this.type == "brute"){
                 //     var enRec = [this.left, this.top, this.size, this.size]
