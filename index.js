@@ -22,6 +22,7 @@ var doubletimeRec = [] //gets calculated
 
 var cancelButtonRec = [] //gets calculated
 var optionsRecs = [] //gets calculated
+var changeRecs = [] //gets calculated
 var popUpRec = [] //getscalculated
 var returnButtonRec = [] //gets calculated
 var gameActive = true; //gets calculated
@@ -38,7 +39,7 @@ var theEnemies = [];   //gets calculated
 var enemyDelay = 90;
 var startDelay = 100; //500
 var eDelayCount = 0;    //gets calculated
-var sDelayCount = 0;
+var sDelayCount = 0;    //gets calculated
 var activeEnemies = 0;   //gets calculated
 var theDefences = [];    //gets calculated
 var waveRunning = true;   //gets calculated
@@ -46,18 +47,26 @@ var waveNum = 1;    //gets calculated
 var theBase = {};    //gets calculated
 var gameOver = false;    //gets calculated
 var choosing = false;    //gets calculated
+var changing = false;    //gets calculated
 var choosingFor = null   //gets calculated
-var subtypes = ["basic","slow"]
+var subtypes = ["basic","slow", "ion", "phaser"]
+var startPrices = [20, 5, 50, 100]
+var popUpAlpha = 0.7 
+var towerColors = [[100,100,0],[0,100,100],[150,50,0], [50,15,255]]
 var options = [] //gets calculated
 var prices = new Array(10).fill(0) //gets calculated
-var popUpAlpha = 0.7 
-var startPrices = [20,5]
-var lapse = 0;
-var startTime = new Date();
-
 var gameSpeedMult = 1;
-// var gameTime = 0;
-;
+
+var focused = false;
+var startTime = new Date();
+var lapse = 0;
+var unfocusedLapse = 0;
+var unfocusedTime = new Date();
+var nowaveLapse = 0;
+var nowaveTime = new Date();
+
+
+
 //Main Animation Loop
 const mainLoop = function(){
     const currTime = new Date();
@@ -70,7 +79,10 @@ const mainLoop = function(){
 
     if(gameActive){
         if(waveRunning){
-            lapse = (currTime.getTime()/1000 - startTime.getTime()/1000)*gameSpeedMult 
+            // console.warn(unfocusedLapse, nowaveLapse)
+            lapse = (currTime.getTime() - startTime.getTime() -unfocusedLapse -nowaveLapse)*gameSpeedMult/1000
+            // unfocusedLapse = 0;
+            // nowaveLapse = 0;
         }
 
         drawBoard()
@@ -116,6 +128,17 @@ const mainLoop = function(){
         
         soundPlayed = true;
     }
+
+
+
+
+    if (!document.hidden) {
+        focused = true
+    }
+
+
+
+
 
     //////////////////////////////next frame////////////////////////////////
     const fpsMax = 60;
@@ -257,14 +280,18 @@ const drawPopup = function(){
             }
             fillRec(opRec, (backC)) 
 
-            if(options[i] == "basic" || options[i] == "slow"){
-                var col = (options[i] == "basic")? [100,100,0,popUpAlpha] : (options[i] == "slow")? [0,100,100,popUpAlpha] : [255,255,255]
+
+            //draw subtype in options
+            if(subtypes.includes(options[i])){
+                var col = towerColors[i]
                 fillRec([opRec[0]+opRec[2]/4, opRec[1]+opRec[3]/2-opRec[2]/4, opRec[2]/2,opRec[2]/2],([50,50,50,popUpAlpha]))
                 fillCir([opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/2, opRec[2]/6], (col)) 
             }
             
         }
 
+
+        //background indicator of selected
         if((choosingFor.left+pieceSize/2)>gameCent[0]){
             fillTri([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2],[popUpRec[0],popUpRec[1]],[popUpRec[0],popUpRec[1]+popUpRec[3]/4],([0,200,0,0.25]))
         }else{
@@ -273,6 +300,34 @@ const drawPopup = function(){
         strokeRec(popUpRec,3,([0,200,0,0.25]))
         fillCir([choosingFor.left+pieceSize/2, choosingFor.top+pieceSize/2,pieceSize*0.5],([0,200,0,0.25]))
 
+        //draw over current menu it change option is picked
+        if(changing){
+            //todo draw change butons
+            // console.log(popUpRec)
+            fillRec(popUpRec,[0,0,0])
+            var otherTypes = [...subtypes]
+            removeFromArray(otherTypes,choosingFor.subtype)
+            for(var i=0; i<otherTypes.length; i++){
+                // changeRecs[i] = [12,12,123,23]
+                var c = i;
+                if(!(i<subtypes.indexOf(choosingFor.subtype))){
+                    c++
+                }
+                var col = towerColors[c]
+                var chwid = popUpRec[2]*(0.75/(otherTypes.length))
+                var chleft = popUpRec[0] + popUpRec[2]*(0.25/(otherTypes.length+1))*(i+1)+chwid*i
+                changeRecs[i] = [chleft,popUpRec[1]+popUpRec[3]*0.35,chwid,popUpRec[3]*0.3]
+                var theRec = changeRecs[i]
+                var backC = [100,100,100,popUpAlpha]
+                if(gold < prices[i]){
+                    backC = [50,50,50,popUpAlpha]
+                }
+                fillRec(theRec, (backC)) 
+                var towScale = 0.75;
+                fillRec([ theRec[0] + (theRec[2]*(1-towScale))/2, theRec[1]+theRec[3]/2-theRec[2]*towScale/2, theRec[2]*towScale, theRec[2]*towScale],[50,50,50,popUpAlpha])
+                fillCir([theRec[0]+theRec[2]/2, theRec[1]+theRec[3]/2, theRec[2]/6], (col)) 
+            }
+        }
     }
 }
 
@@ -289,14 +344,23 @@ const towerOptions = function(){
     }else if(choosingFor.type == "base"){
         options = ["upgrade1", "upgrade2", "upgrade3", "repair"]
     }else if(choosingFor.type == "defense"){
-        options = ["upgrade1", "upgrade2", "upgrade3"]
-        for(var i=0; i<subtypes.length; i++){
-            if(subtypes[i] != choosingFor.subtype){
-                options.push(subtypes[i])
-            }
-        }
+        options = ["upgrade1", "upgrade2", "upgrade3", "change"]
+
+
+        // for(var i=0; i<subtypes.length; i++){
+        //     if(subtypes[i] != choosingFor.subtype){
+        //         options.push(subtypes[i])
+        //     }
+        // }
     }
 
+    calcPrices()
+
+}
+
+
+const calcPrices = function(){
+    console.log('setting prices')
     //set prices
     for (var i = 0; i< options.length; i++){
         switch(options[i]){
@@ -309,13 +373,7 @@ const towerOptions = function(){
             case "upgrade3": //range
                 prices[i] = floor(choosingFor.cost/2)
                 break;
-            case "slow":    //build or change
-                prices[i] = (choosingFor.type == "empty")? startPrices[1] : floor(choosingFor.cost/(startPrices[0]/startPrices[1]))
-                
-                break;
-            case "basic":   //build or change
-                prices[i] = (choosingFor.type == "empty")? startPrices[0] : floor(choosingFor.cost*(startPrices[0]/startPrices[1]))
-                break;  
+             
             case "repair":
                 prices[i] = 100;
                 var maxPrice = prices[i]
@@ -324,14 +382,45 @@ const towerOptions = function(){
                 if(maxPrice > gold){maxPrice = gold}
                 prices[i] = maxPrice
                 break;
+
+            case "change":
+                prices[i] = 0;
+                break;
+
             default:
                 break;
         }
+        
+        
+        if(subtypes.includes(options[i])&&!changing){
+            console.log('subtype detected', subtypes[i])
+            
+            prices[i] = startPrices[i]                 
+        }
+
+        if(changing){
+            console.log('prices for changing')
+            var chst =choosingFor.subtype
+            var j = subtypes.indexOf(chst)
+            if(j > i){
+                prices[i] = ceil(startPrices[i] / startPrices[j]*choosingFor.cost - choosingFor.cost/2)
+                if(prices[i]<0){
+                    prices[i] = 0
+                }
+            } else if (j<i){
+                prices[i-1] = ceil(startPrices[i] / startPrices[j]*choosingFor.cost - choosingFor.cost/2)
+                if(prices[i-1]<0){
+                    prices[i-1] = 0
+                }
+            }
+
+        }
+
+              
     }
+    console.log(prices)
+
 }
-
-
-
 
 
 const doNew = function(){
@@ -347,6 +436,12 @@ const doNew = function(){
         eDelayCount = 0
         paths = []
         waveRunning = true; 
+        nowaveLapse =0
+        lapse = 0
+        startTime = new Date()
+        nowaveTime = new Date()
+        unfocusedLapse = 0
+        unfocusedTime = new Date()
         waveNum = 1;
         theBase = {};    //gets calculated
         gameOver = false; 
@@ -403,7 +498,12 @@ const click = function(){
         if(isInside([mdX,mdY],menuButtonRec)){
             console.log("menu clicked")
             gameActive = false;
-            // theMenuDiv.style.visibility = "visible"
+            waveRunning = false;
+            if(!choosing){
+                // console.warn('menu paused the running game')
+                nowaveTime = new Date()
+                // console.log('nowavetime',nowaveTime)
+            }
         }
 
         //grid clicked
@@ -422,7 +522,7 @@ const click = function(){
             }
             
             if(isInside([mdX,mdY],doubletimeRec)){
-                console.warn('gamespeedchanged')
+                console.log('gamespeedchanged',gameSpeedMult)
                 if(gameSpeedMult == 2){
                     gameSpeedMult = 1
                 }else{
@@ -432,137 +532,131 @@ const click = function(){
 
             
         }else if(!gameOver){
+
+
             //popup clicked
             if(isInside([mdX,mdY],cancelButtonRec)||(!isInside([mdX,mdY],popUpRec)&&!isInside([mdX,mdY],menuButtonRec))){
-                choosing = false;
-                choosingFor = null
                 console.log('cancel clicked')
-                options=[]
-                waveRunning = true;
+                
+                if(changing){
+                    changing = false;
+                    console.log('canceled changing')
+                    towerOptions()
+                }else{
+                    console.log('exit build menu')
+                    choosing = false;
+                    choosingFor = null
+                    options=[]
+                    waveRunning = true;
+                    nowaveLapse += new Date() - nowaveTime.getTime()
+                }
+                
             }
             if(isInside([mdX,mdY],sellButtonRec)&&(choosingFor.type == "defense")){
-                choosing = false;
-                console.log('sell clicked')
-                gold+=choosingFor.cost/2;
-                choosingFor.type = "empty"
-                choosingFor.color = [5,5,5]
-                theDefences.splice(theDefences.indexOf(choosingFor),1)
-
-
-                choosingFor = null
-
-                options=[]
-                waveRunning = true;
+                if(changing){
+                    //nada
+                }else{
+                    choosing = false;
+                    console.log('sell clicked')
+                    gold+=choosingFor.cost/2;
+                    choosingFor.type = "empty"
+                    choosingFor.color = [5,5,5]
+                    removeFromArray(theDefences,choosingFor)
+                    choosingFor = null
+                    options=[]
+                    waveRunning = true;
+                    nowaveLapse += new Date() - nowaveTime.getTime()
+                    // console.log('new nowaveLapase',nowaveLapse)
+                }
+                
             }
             if(choosingFor){
-                if(isInside([mdX,mdY],sellButtonRec)&&(choosingFor.type != "defense")){
+                if(isInside([mdX,mdY],sellButtonRec)&&(choosingFor.type != "defense"||(changing))){
                     splashText(sellButtonRec[0]+textH/4, sellButtonRec[1]+textH/1.5,"CAN NOT SELL THIS",textH/2,100,[255,0,0])
-    
                 }
             }
             
-            
-            //option clicked
-            // console.log('checking options', options, optionsRecs)
-            var done = false
-            for(var i=0; i<options.length; i++){
-                if(!done){
-                    // console.log('checking', i)
-                    // console.log(options,optionsRecs)
-                    
-                    if((optionsRecs[i])&&isInside([mdX,mdY],optionsRecs[i])){
-                        // console.log('option '+i.toString()+" clicked")
-                        var thePrice = prices[i]
-
-                        if(gold >= thePrice){
-
-                            if(choosingFor.type == "empty"){
-
-
-                                if(options[i] == "basic"){
-                                    choosingFor.type = "defense"
-                                    choosingFor.subtype = "basic"
-                                    choosingFor.cost = startPrices[0]
-                                    theDefences.push(choosingFor)
-                                    console.log('built tower ',choosingFor.subtype)
-
-                                }else if(options[i] == "slow"){
-                                    choosingFor.type = "defense"
-                                    choosingFor.subtype = "slow"
-                                    choosingFor.numLasers = 3;
-                                    choosingFor.cost = startPrices[1]
-                                    theDefences.push(choosingFor)
-                                    console.log('built tower ',choosingFor.subtype)
+            //if not changing subtypes in popup
+            if(!changing){
+                // console.log('checking options', options, optionsRecs)
+                var done = false
+                for(var i=0; i<options.length; i++){
+                    if(!done){
+                        if((optionsRecs[i])&&isInside([mdX,mdY],optionsRecs[i])){
+                            var thePrice = prices[i]
+                            if(gold >= thePrice){
+                                if(choosingFor.type == "empty"){
+                                    if(subtypes.includes(options[i])){
+                                        choosingFor.type = "defense"
+                                        choosingFor.subtype = options[i]
+                                        choosingFor.cost = startPrices[i]
+                                        theDefences.push(choosingFor)
+                                        console.log('built tower ',choosingFor.subtype)
+                                    }
+                                }else if(choosingFor.type == "defense"){
+                                    if(options[i] == "upgrade1"){
+                                        choosingFor.numLasers++
+                                        choosingFor.cost += thePrice
+                                        console.log('upgraded laser count',choosingFor)
+                                    }else if(options[i] == "upgrade2"){
+                                        choosingFor.power++
+                                        console.log('upgraded tower power',choosingFor)
+                                        choosingFor.cost += thePrice
+                                    }else if(options[i] == "upgrade3"){
+                                        choosingFor.range++
+                                        choosingFor.cost += thePrice
+                                        console.log('upgraded tower range',choosingFor)
+                                    }else if(options[i] == "change"){
+                                        changing = true;
+                                        console.log('change tower type menu')
+                                    }
+                                }else if(choosingFor.type == "base"){
+                                    if(options[i] == "repair"){
+                                        console.log('repairing base', thePrice)
+                                        theBase.health+= thePrice
+                                        
+                                    }if(options[i] == "upgrade1"){
+                                        choosingFor.numLasers ++
+                                        choosingFor.cost += thePrice
+                                        console.log('upgraded laser count',choosingFor)
+                                    }else if(options[i] == "upgrade2"){
+                                        choosingFor.power++
+                                        choosingFor.cost += thePrice
+                                        console.log('upgraded tower power',choosingFor)
+                                    }else if(options[i] == "upgrade3"){
+                                        choosingFor.range++
+                                        choosingFor.cost += thePrice
+                                        console.log('upgraded tower range',choosingFor)
+                                    }
                                 }
-                            }else if(choosingFor.type == "defense"){
-                                if(options[i] == "upgrade1"){
-                                    choosingFor.numLasers++
-                                    choosingFor.cost += thePrice
-                                    console.log('upgraded laser count',choosingFor)
-
-                                }else if(options[i] == "upgrade2"){
-                                    choosingFor.power++
-                                    console.log('upgraded tower power',choosingFor)
-
-                                    choosingFor.cost += thePrice
-                                }else if(options[i] == "upgrade3"){
-                                    choosingFor.range++
-                                    choosingFor.cost += thePrice
-                                    console.log('upgraded tower range',choosingFor)
-
-                                }else if(options[i] == "slow"){
-                                    var lastSub = choosingFor.subtype
-                                    choosingFor.subtype = "slow"
-                                    choosingFor.cost = thePrice
-                                    console.log('changed tower',choosingFor.subtype,lastSub)
-
-                                }else if(options[i] == "basic"){
-                                    choosingFor.subtype = "basic"
-                                    choosingFor.cost = thePrice
+                                
+                                done = true;
+                                if(!changing){
+                                    console.log("option "+options[i]+" purchased for " + prices[i])
+                                    console.log("purchase for:", choosingFor)
+                                    gold -= prices [i]
+                                    options=[]
+                                    towerOptions()
+                                }else{
+                                    console.warn('hmmmm')
+                                    calcPrices()
+                                }
+                                
+                            }else{
+                                console.log("CANNOT AFFORD")
+                                if(optionsRecs[i]){
+                                    splashText(optionsRecs[i][0]+optionsRecs[i][2]/5, optionsRecs[i][1]+textH*1.1,"GOLD",textH/2,50,[255,0,0])
 
                                 }
-                            }else if(choosingFor.type == "base"){
-                                if(options[i] == "repair"){
-                                    console.log('repairing base', thePrice)
-                                    
-                                    theBase.health+= thePrice
-                                    
-                                }if(options[i] == "upgrade1"){
-                                    choosingFor.numLasers ++
-                                    choosingFor.cost += thePrice
-                                    console.log('upgraded laser count',choosingFor)
-                                }else if(options[i] == "upgrade2"){
-                                    choosingFor.power++
-                                    choosingFor.cost += thePrice
-                                    console.log('upgraded tower power',choosingFor)
-                                }else if(options[i] == "upgrade3"){
-                                    choosingFor.range++
-                                    choosingFor.cost += thePrice
-                                    console.log('upgraded tower range',choosingFor)
-                                }
-                            }
-                            
-
-                            
-                            console.log("option "+options[i]+" purchased for " + prices[i])
-                            console.log("purchase for:", choosingFor)
-
-                            gold -= prices [i]
-
-                            options=[]
-                            done = true;
-                            towerOptions()
-                        }else{
-                            console.log("CANNOT AFFORD")
-                            if(optionsRecs[i]){
-                                splashText(optionsRecs[i][0]+optionsRecs[i][2]/5, optionsRecs[i][1]+textH*1.1,"GOLD",textH/2,50,[255,0,0])
 
                             }
-
                         }
                     }
                 }
+            }else{
+                //todo check click change 
             }
+            
         }else{
             if(isInside([mdX,mdY],popUpRec)){
                 doNew()
@@ -572,6 +666,12 @@ const click = function(){
         if(isInside([mdX,mdY],returnButtonRec)){
             console.log("return clicked")
             gameActive = true;
+            if(!choosing){
+                nowaveLapse += new Date().getTime() - nowaveTime.getTime()
+                // console.log('new nowavelapse', nowaveLapse)
+                waveRunning = true;
+
+            }
         }
     }
 }
@@ -593,9 +693,12 @@ const checkRelease = function(){
                 if(arrEq(selected, target)&&!(sPiece.type == "path")&&waveRunning){
                     if(choosing == false){
                         choosing = true;
+                
                         console.log("opening options for",sPiece)
                         choosingFor = sPiece
                         waveRunning = false;
+                        nowaveTime = new Date()
+                        // console.log('nowavetime', nowaveTime.getTime())
                     }
                     //available option names
                     towerOptions()
@@ -770,3 +873,22 @@ externalResizeFunctions.push(()=>{
         
     }
 })
+
+var ctimer = undefined
+const onAppFocus = function(){
+    focused = true
+    if(gameActive&&waveRunning){
+        unfocusedLapse += new Date().getTime() - unfocusedTime
+        // console.log('unfocused running time', unfocusedLapse)
+    }
+}
+
+const onAppUnfocus = function(){
+    focused = false
+    
+    if(gameActive&&waveRunning){
+        unfocusedTime = new Date();
+    }
+
+}
+

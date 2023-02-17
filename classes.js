@@ -36,93 +36,133 @@ class Piece {
 
             }
             if(this.type == "defense"){
-                var col = (this.subtype == "basic")? [100,100,0] : (this.subtype == "slow")? [0,100,100] : [255,255,255]
+                var col = towerColors[subtypes.indexOf(this.subtype)]
                 fillCir([this.left+pieceSize/2, this.top+pieceSize/2, pieceSize*0.75/2], col)
             }
         }
         this.findEnemies = ()=>{
-            this.enemies = new Array([-1])
+            if (this.subtype == "ion"){
+                //todo
+                //while firing ion, enemies who cross into beam get damaged.
+                //user drags the tower to their chosen toarget square on the path.
+                //that target path tile becomes the "enemy" but takes no damage
+            }else{
+                this.enemies = new Array([-1])
 
-            var sor = [this.left+pieceSize/2, this.top + pieceSize/2]
-            
-            for(var li = 0; li<this.numLasers; li++){
-                var tarPind = 1000000
-                var closest = 1000000;
-                for(var ei=(activeEnemies - 1); ei>=0; ei--){
-                    if(!this.enemies.includes(ei)){
-                        var tartar = [theEnemies[ei].left+pieceSize/4, theEnemies[ei].top + pieceSize/4]
-                        var dis = dist(sor,tartar)
-                        
-                        if(dis <= this.range*pieceSize){
-                            if(this.subtype == "slow"){
-                                if(dis<closest){
-                                    closest = dis
-                                    this.enemies[li] = ei
-                                }
-                            }else{
-                                if(tarPind > theEnemies[ei].pathStep){
-                                    this.enemies[li] = ei
+                var sor = [this.left+pieceSize/2, this.top + pieceSize/2]
+                
+                for(var li = 0; li<this.numLasers; li++){
+                    var tarPind = 1000000
+                    var closest = 1000000;
+                    for(var ei=(activeEnemies - 1); ei>=0; ei--){
+                        if(!this.enemies.includes(ei)){
+                            var tartar = [theEnemies[ei].left+pieceSize/4, theEnemies[ei].top + pieceSize/4]
+                            var dis = dist(sor,tartar)
+                            
+                            if(dis <= this.range*pieceSize){
+                                if(this.subtype == "slow"){
+                                    if(dis<closest){
+                                        closest = dis
+                                        this.enemies[li] = ei
+                                    }
+                                }else{
+                                    if(tarPind > theEnemies[ei].pathStep){
+                                        this.enemies[li] = ei
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+            
         }
         this.drawLaser = ()=>{
             
             
             if(this.enemies[0] > -1){
-                var sor = [this.left+pieceSize/2, this.top + pieceSize/2]
-                for(var ei=this.enemies.length -1; ei>=0; ei--){
-                    if(this.enemies[ei]<0){
-                        console.warn(this.enemies[ei])
-                    }else if(this.enemies[ei] > (theEnemies.length-1)){
-                        console.warn(this.enemies[ei])
+                if(this.enemies[0].type == "path"){
+                    //todo, path targeting lasers
+                    //ION laser
+                    //ion tower fires its laser from space, and is larger
+                    //tower has limited shot count(lasers)
+                    //tower must charge up (power) for each shot
+                    //CANNOT TARGET OWN BASE
+                    //limited target range
+                    //only attacks path point
+
+                    //phaser laser
+                    //with more overall power than ion
+                    //travels in opposite direction along chosen path
+                    //attacking all enemeies in the path
+                    //moves faster than the enemies on average
+                    //Always only 1 shot, but it is effective
+                    //laser count is actually speed
+                    //recharge slightly faster than ion
+                    //
+
+
+                }else{
+                    var sor = [this.left+pieceSize/2, this.top + pieceSize/2]
+                    for(var ei=this.enemies.length -1; ei>=0; ei--){
+                        if(this.enemies[ei]<0){
+                            console.warn(this.enemies[ei])
+                        }else if(this.enemies[ei] > (theEnemies.length-1)){
+                            console.warn(this.enemies[ei])
+                        }
+                        var theenemy = theEnemies[this.enemies[ei]]
+                        var tar = [theenemy.left+pieceSize/4, theenemy.top + pieceSize/4]
+                        var sz = 3+this.power; 
+                        var co = [200,180,0,0.8]
+                        if(this.type == "base"){
+                            co = [200,123,50,0.8]
+                        }
+                        if(this.subtype == "slow"){
+                            co = [0,200,200,0.8]
+                        }
+                        // console.log('herereer')
+                        drawLine(sor,tar,sz,co)
                     }
-                    var theenemy = theEnemies[this.enemies[ei]]
-                    var tar = [theenemy.left+pieceSize/4, theenemy.top + pieceSize/4]
-                    var sz = 3+this.power; 
-                    var co = [200,180,0,0.8]
-                    if(this.type == "base"){
-                        co = [200,123,50,0.8]
-                    }
-                    if(this.subtype == "slow"){
-                        co = [0,200,200,0.8]
-                    }
-                    // console.log('herereer')
-                    drawLine(sor,tar,sz,co)
                 }
-                
             }
         }
         this.doDamage = function(){
+
+            
             if(this.enemies[0] > -1){
-                for(var ei=this.enemies.length -1; ei>=0; ei--){
-                    var theenemy = theEnemies[this.enemies[ei]]
-                    if(theenemy != undefined){
-                        if(this.subtype == "basic"){
-                            if(theenemy.health > this.power){
-                                var attackOffset = 0.75;
-                                var hit = (this.power+attackOffset-theenemy.armor)*gameSpeedMult/2
-                                theenemy.health -= (hit >0)? hit : 0
-                            }else{
-                                theenemy.health = 0
-                                theenemy.destroy()
-                                score+=theenemy.reward
-                                gold+=theenemy.reward
-                                if(ei > 0){
-                                    this.enemies.pop()
+                if(this.enemies[0].subtype == "path"){
+                    //todo
+                    //ion
+                    //phaser
+
+                }else{
+                    for(var ei=this.enemies.length -1; ei>=0; ei--){
+                        var theenemy = theEnemies[this.enemies[ei]]
+                        if(theenemy != undefined){
+                            if(this.subtype == "basic"){
+                                if(theenemy.health > this.power){
+                                    var attackOffset = 0.75;
+                                    var hit = (this.power+attackOffset-theenemy.armor)*gameSpeedMult/2
+                                    theenemy.health -= (hit >0)? hit : 0
                                 }else{
-                                    this.enemies[0] = -1
+                                    theenemy.health = 0
+                                    theenemy.destroy()
+                                    score+=theenemy.reward
+                                    gold+=theenemy.reward
+                                    if(ei > 0){
+                                        this.enemies.pop()
+                                    }else{
+                                        this.enemies[0] = -1
+                                    }
                                 }
+                            }else if(this.subtype == "slow"){
+                                theenemy.speedMod /= (this.power+1.25);
                             }
-                        }else if(this.subtype == "slow"){
-                            theenemy.speedMod /= (this.power+1.25);
                         }
+                        
                     }
-                    
                 }
+                
             }
         }
     }
@@ -236,7 +276,7 @@ class Enemy {
             this.left = 0;
             this.top = 0;
             activeEnemies--
-            theEnemies.splice(theEnemies.indexOf(this),1)
+            removeFromArray(theEnemies,this)
             if(theEnemies.length == 0){
                 waveNum++
                 genEnemies()

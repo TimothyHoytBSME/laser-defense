@@ -64,6 +64,10 @@ const arrEq = function(a,b){
     return true
 }
 
+const removeFromArray = function(theArr, el){
+    theArr.splice(theArr.indexOf(el),1)
+}
+
 //checks if point [x,y] is inside rectangle [left,top,width,height]
 const isInside = function(p,r){
     return  (p[0]>(r[0])) && (p[1]>r[1]) && (p[0]<(r[0]+r[2])) && (p[1]<(r[1]+r[3])) 
@@ -181,7 +185,6 @@ const invertCol = function(col){
 //converts [r,g,b] to 'rgb(r,g,b)' and [r,g,b,a] to 'rgba(r,g,b,a)'
 const colText = function(col){
     var CCC = [...col]
-    // console.log(col)
     if(CCC.length == 3) return 'rgb(' + CCC[0].toString() + ',' + CCC[1].toString() + ',' + CCC[2].toString() +')'
     if(CCC.length == 4) return 'rgba(' + CCC[0].toString() + ',' + CCC[1].toString() + ',' + CCC[2].toString() + ',' + CCC[3].toString() +')'
     console.error('whoops')
@@ -368,7 +371,15 @@ onmousemove = (e) => {
     
 }
 
+//override of window focus event
+onfocus = (e)=>{console.log("app Focused")
+    onAppFocus()
+}
 
+//override of window unfocus event
+onblur = (e)=>{
+    onAppUnfocus()
+}
 ////////////////////event helpers///////////////////
 
 //gets fired if mousedown is inside canvas

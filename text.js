@@ -103,7 +103,7 @@ const drawTexts = function(){
             
 
             //todo stats
-            if(chTyp != "empty"){
+            if(chTyp != "empty"&&!changing){
                 //numLasers
                 var numLText = choosingFor.numLasers.toString()
                 
@@ -134,54 +134,72 @@ const drawTexts = function(){
                 
                 fillText(popUpRec[0] + leftInc*3,top1, "RANGE",tsize, [255,255,255])
                 fillText(popUpRec[0] + leftInc*3,top2,ranText ,tsize, [255,255,255])
+            }else if(changing){
+                fillText(gameCent[0],gameCent[1]-popUpRec[3]/4,"CHANGE TYPE TO",textH/2,[255,255,255])
             }
 
-            for(var i=0; i<options.length; i++){
-                var opRec = optionsRecs[i]
-                var optionText = "BUILD " + options[i].toUpperCase()
-                if(chTyp == "base"){
-                    optionText = options[i].toUpperCase()
-                    
-                }else if(chTyp == "defense"){
-                    if(options[i] == "upgrade"){
+            if(!changing){
+                for(var i=0; i<options.length; i++){
+                    var opRec = optionsRecs[i]
+                    var optionText = "BUILD " + options[i].toUpperCase()
+                    if(chTyp == "base"){
                         optionText = options[i].toUpperCase()
-                    }else{
-                        optionText = "CHANGE"
+                        
+                    }else if(chTyp == "defense"){
+                        if(options[i] == "upgrade"){
+                            optionText = options[i].toUpperCase()
+                        }else{
+                            optionText = "CHANGE"
+                        }
+                    }
+                    if(options[i] == "upgrade1" || options[i] == "upgrade2" || options[i] == "upgrade3"){
+                        optionText = ""
+                    }
+                    
+                    fillText(opRec[0]+opRec[2]/2, opRec[1], optionText, textH*0.5, [255,255,255])
+
+                    
+
+                    var optionText2 = prices[i].toString() + " G"
+
+                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/8, optionText2, textH*0.5, [255,255,255])
+
+                    
+                    if(options[i] == "repair"){
+                        fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/2.25,"+",textH*1.5,[255,0,0])
+                        fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.25, prices[i].toString(),textH, [255,0,0])
+                    }else if(options[i] == "upgrade1"){ //lasers
+                        fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.8,"+1",textH*1.5,[200,200,200,0.75])
+                    }else if(options[i] == "upgrade2"){ //power
+                        fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.8,"+1",textH*1.5,[200,200,200,0.75])
+                    }else if(options[i] == "upgrade3"){ //range
+                        fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.8,"+1",textH*1.5,[200,200,200,0.75])                        
                     }
                 }
-                if(options[i] == "upgrade1" || options[i] == "upgrade2" || options[i] == "upgrade3"){
-                    optionText = ""
-                }
-                
-                fillText(opRec[0]+opRec[2]/2, opRec[1], optionText, textH*0.5, [255,255,255])
-
-                
-
-                var optionText2 = prices[i].toString() + " G"
-
-                fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/8, optionText2, textH*0.5, [255,255,255])
-
-                if(options[i] == "repair"){
-                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/2.25,"+",textH*1.5,[255,0,0])
-                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.25, prices[i].toString(),textH, [255,0,0])
-                }else if(options[i] == "upgrade1"){ //lasers
-                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.8,"+1",textH*1.5,[200,200,200,0.75])
-                }else if(options[i] == "upgrade2"){ //power
-                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.8,"+1",textH*1.5,[200,200,200,0.75])
-                }else if(options[i] == "upgrade3"){ //range
-                    fillText(opRec[0]+opRec[2]/2, opRec[1]+opRec[3]/1.8,"+1",textH*1.5,[200,200,200,0.75])
-
-                    
+            }else{
+                var otherTypes = [...subtypes]
+                removeFromArray(otherTypes,choosingFor.subtype)
+                for(var i=0; i<otherTypes.length; i++){
+                    var chRec = changeRecs[i]
+                    var optionText = otherTypes[i].toUpperCase()
+                    fillText(chRec[0]+chRec[2]/2, chRec[1], optionText, textH*0.5, [255,255,255])
+                    var optionText2 = prices[i].toString() + " G"
+                    fillText(chRec[0]+chRec[2]/2, chRec[1]+chRec[3]/8, optionText2, textH*0.5, [255,255,255])
                 }
                 
             }
 
             var sellText = "SELL (" + floor((choosingFor.cost/2)).toString() + " G)"
-            if(chTyp != "defense"){
+            if(chTyp != "defense"||(changing)){
                 sellText = "CANNOT SELL"
             }
             fillText(sellButtonRec[0]+sellButtonRec[2]/2, sellButtonRec[1]+sellButtonRec[3]/2, sellText, textH*0.5, [255,255,255])
-            fillText(cancelButtonRec[0]+cancelButtonRec[2]/2, cancelButtonRec[1]+cancelButtonRec[3]/2, "EXIT", textH*0.5, [255,255,255])
+
+            var exitText = "EXIT"
+            if(changing){
+                exitText = "BACK"
+            }
+            fillText(cancelButtonRec[0]+cancelButtonRec[2]/2, cancelButtonRec[1]+cancelButtonRec[3]/2, exitText, textH*0.5, [255,255,255])
 
             ctx.textAlign = "left"
             ctx.textBaseline = 'bottom'
