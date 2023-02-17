@@ -54,6 +54,7 @@ var startPrices = [20, 5, 50, 100]
 var popUpAlpha = 0.7 
 var towerColors = [[100,100,0],[0,100,100],[150,50,0], [50,15,255]]
 var options = [] //gets calculated
+var changeOps = [] //gets calculated
 var prices = new Array(10).fill(0) //gets calculated
 var gameSpeedMult = 1;
 
@@ -302,11 +303,10 @@ const drawPopup = function(){
 
         //draw over current menu it change option is picked
         if(changing){
-            //todo draw change butons
-            // console.log(popUpRec)
             fillRec(popUpRec,[0,0,0])
             var otherTypes = [...subtypes]
             removeFromArray(otherTypes,choosingFor.subtype)
+            changeOps = otherTypes;
             for(var i=0; i<otherTypes.length; i++){
                 // changeRecs[i] = [12,12,123,23]
                 var c = i;
@@ -346,12 +346,6 @@ const towerOptions = function(){
     }else if(choosingFor.type == "defense"){
         options = ["upgrade1", "upgrade2", "upgrade3", "change"]
 
-
-        // for(var i=0; i<subtypes.length; i++){
-        //     if(subtypes[i] != choosingFor.subtype){
-        //         options.push(subtypes[i])
-        //     }
-        // }
     }
 
     calcPrices()
@@ -485,7 +479,7 @@ const onMoveMouse = function(){
 }
 
 
-const click = function(){
+const click = function(){ //mousedown
     if(gameActive){
         
 
@@ -534,7 +528,7 @@ const click = function(){
         }else if(!gameOver){
 
 
-            //popup clicked
+            //exit button
             if(isInside([mdX,mdY],cancelButtonRec)||(!isInside([mdX,mdY],popUpRec)&&!isInside([mdX,mdY],menuButtonRec))){
                 console.log('cancel clicked')
                 
@@ -552,6 +546,7 @@ const click = function(){
                 }
                 
             }
+            //sell button
             if(isInside([mdX,mdY],sellButtonRec)&&(choosingFor.type == "defense")){
                 if(changing){
                     //nada
@@ -566,19 +561,15 @@ const click = function(){
                     options=[]
                     waveRunning = true;
                     nowaveLapse += new Date() - nowaveTime.getTime()
-                    // console.log('new nowaveLapase',nowaveLapse)
                 }
-                
             }
             if(choosingFor){
                 if(isInside([mdX,mdY],sellButtonRec)&&(choosingFor.type != "defense"||(changing))){
                     splashText(sellButtonRec[0]+textH/4, sellButtonRec[1]+textH/1.5,"CAN NOT SELL THIS",textH/2,100,[255,0,0])
                 }
             }
-            
-            //if not changing subtypes in popup
+            //if not changing subtypes in popup check for option click
             if(!changing){
-                // console.log('checking options', options, optionsRecs)
                 var done = false
                 for(var i=0; i<options.length; i++){
                     if(!done){
@@ -629,8 +620,7 @@ const click = function(){
                                         console.log('upgraded tower range',choosingFor)
                                     }
                                 }
-                                
-                                done = true;
+                                done = true; //clicked option found, don't continue checking
                                 if(!changing){
                                     console.log("option "+options[i]+" purchased for " + prices[i])
                                     console.log("purchase for:", choosingFor)
@@ -641,20 +631,29 @@ const click = function(){
                                     console.warn('hmmmm')
                                     calcPrices()
                                 }
-                                
                             }else{
                                 console.log("CANNOT AFFORD")
                                 if(optionsRecs[i]){
                                     splashText(optionsRecs[i][0]+optionsRecs[i][2]/5, optionsRecs[i][1]+textH*1.1,"GOLD",textH/2,50,[255,0,0])
-
                                 }
-
                             }
                         }
                     }
                 }
             }else{
-                //todo check click change 
+                for(var i = 0; i< changeOps.length; i++){
+                    if(isInside([mdX,mdY],changeRecs[i])){
+                        console.log('a change clicked')
+                        if(gold>=prices[i]){
+                            console.log('changing',choosingFor.type, "to", changeOps[i])
+                            choosingFor.subtype = changeOps[i]
+                            choosingFor.cost += prices[i]
+                            gold-=prices[i]
+                            changing = false;
+                            towerOptions()
+                        }
+                    }
+                }
             }
             
         }else{
@@ -763,7 +762,6 @@ const genBase = function(){
 }
 
 const genPaths = function(){
-    //todo generate paths
     
     for(var p=0; p<numPaths; p++){
         var path = []
