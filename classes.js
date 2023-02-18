@@ -17,14 +17,14 @@ class Piece {
         this.isSelected = false;
         this.isTarget = false;
         this.health = 100;
-        this.enemies = new Array([-1]);
+        this.enemies = new Array(1).fill(-1);
         this.range = 4;
         this.numLasers = 1;
         this.power = 1
-        this.enemies = new Array([-1])
         this.charge = 0
         this.numShots = 0
-        this.chargeRate = 0.1
+        this.chargeRate = 0.3
+        this.timers = []
 
         this.draw = () => {
             
@@ -42,15 +42,37 @@ class Piece {
                 var col = towerColors[subtypes.indexOf(this.subtype)]
                 fillCir([this.left+pieceSize/2, this.top+pieceSize/2, pieceSize*0.75/2], col)
             }
+
+            if(this.subtype == "ion" || this.subtype == "phaser"){
+                if(this.charge >= 100 && this.numShots < this.numLasers){
+                    this.numShots++
+                    this.charge = 0
+                }else{
+                    if(this.numShots == this.numLasers){
+                        this.charge = 100
+                    }else{
+                        if(waveRunning){
+                            this.charge += this.chargeRate;
+                        }
+                        console.log('charging')
+                    }
+                }
+
+                var chargeRec = [this.left, this.top+pieceSize*0.9, pieceSize*(this.charge/100), pieceSize*0.1]
+                
+                fillRec(chargeRec,[255,50,10])
+
+                
+            }
+
+            
         }
         this.findEnemies = ()=>{
             if (this.subtype == "ion"){
-                //todo
-                //while firing ion, enemies who cross into beam get damaged.
-                //user drags the tower to their chosen toarget square on the path.
-                //that target path tile becomes the "enemy" but takes no damage
+                //do nothing, enemy set as path coordinate when drag and drop
+                
             }else{
-                this.enemies = new Array([-1])
+                this.enemies = new Array(1).fill(-1)
 
                 var sor = [this.left+pieceSize/2, this.top + pieceSize/2]
                 
@@ -82,75 +104,97 @@ class Piece {
         }
         this.drawLaser = ()=>{
             
+            console.log('drawing lasers for', this.enemies)
+            var pointcount = 0;
+            for(var i=0; i<this.enemies.length; i++){
+                if(this.enemies[i].length == 2){
+                    pointcount++
+                }
+            }
+            if(pointcount > 0){
+
+                for(var i=0; i<this.enemies.length; i++){
+                    if(this.enemies[i].length == 2){ //path point [x,y]
+                        if(this.timers[i]>0){
+                            this.timers[i]--
+                            // console.log()
+                            if(this.subtype == "ion"){
+                                // console.warn('oh yea')
+                                var paCo = this.enemies[i];
+                                var enem = gameGrid[paCo[0]][paCo[1]]
+                                // console.log("firing at",enem)
             
-            if(this.enemies[0] > -1){
-                var tar = [theenemy.left+theenemy.size/2, theenemy.top + theenemy.size/2]
-                if(this.enemies[0].type == "path"){
-                    //todo, path targeting lasers
-
-                    if(this.subtype == "ion"){
-                        if(this.charge >= 100 && this.numShots < this.numLasers){
-                            this.numShots++
-                            this.charge = 0
-                        }else{
-                            if(this.numShots == this.numLasers){
-                                this.charge = 100
-                            }else{
-                                this.charge += this.chargeRate;
+                                drawLine([enem.left+pieceSize/2,enem.top + pieceSize/2],[enem.left+pieceSize/3,enem.top-cHeight],20,[255,120,40,0.375])
+                                drawLine([enem.left+pieceSize/2,enem.top + pieceSize/2],[enem.left+pieceSize-pieceSize/3,enem.top-cHeight],20,[255,120,40,0.375])
+                                drawLine([enem.left+pieceSize/2,enem.top + pieceSize/2],[enem.left+pieceSize/2,enem.top-cHeight],8,[255,120,40,0.375])
+        
+                                //ION laser
+                                //ion tower fires its laser from space, and is larger
+                                //tower has limited shot count(lasers)
+                                //tower must charge up (power) for each shot
+                                //CANNOT TARGET OWN BASE
+                                //limited target range
+                                //only attacks path point
+        
+        
+        
+                            }else if(this.subtype == "phaser"){
+                                // if(this.charge < 100){
+                                //     this.charge += this.chargeRate;
+                                // }else{
+                                //     this.charge = 100
+                                // }
+        
+                                //phaser laser
+                                //with more overall power than ion
+                                //travels in opposite direction along chosen path
+                                //attacking all enemeies in the path
+                                //moves faster than the enemies on average
+                                //Always only 1 shot, but it is effective
+                                //laser count is actually speed
+                                //recharge slightly faster than ion
+                                //
+        
+        
                             }
-                        }
-
-                        //ION laser
-                        //ion tower fires its laser from space, and is larger
-                        //tower has limited shot count(lasers)
-                        //tower must charge up (power) for each shot
-                        //CANNOT TARGET OWN BASE
-                        //limited target range
-                        //only attacks path point
-
-
-
-                    }else if(this.subtype == "phaser"){
-                        if(this.charge < 100){
-                            this.charge += this.chargeRate;
                         }else{
-                            this.charge = 100
+                            this.enemies[i] = -1
                         }
-
-                        //phaser laser
-                        //with more overall power than ion
-                        //travels in opposite direction along chosen path
-                        //attacking all enemeies in the path
-                        //moves faster than the enemies on average
-                        //Always only 1 shot, but it is effective
-                        //laser count is actually speed
-                        //recharge slightly faster than ion
-                        //
-
-
-                    }
-
-                }else{
-                    var sor = [this.left+pieceSize/2, this.top + pieceSize/2]
-                    for(var ei=this.enemies.length -1; ei>=0; ei--){
-                        if(this.enemies[ei]<0){
-                            console.warn(this.enemies[ei])
-                        }else if(this.enemies[ei] > (theEnemies.length-1)){
-                            console.warn(this.enemies[ei])
-                        }
-                        var theenemy = theEnemies[this.enemies[ei]]
-                        var sz = 3+this.power; 
-                        var co = [200,180,0,0.8]
-                        if(this.type == "base"){
-                            co = [200,123,50,0.8]
-                        }
-                        if(this.subtype == "slow"){
-                            co = [0,200,200,0.8]
-                        }
-                        // console.log('herereer')
-                        drawLine(sor,tar,sz,co)
+                        
+    
                     }
                 }
+                
+
+
+            }else if(this.enemies[0] != -1){
+                // console.log(this.enemies[0])
+
+            
+                var sor = [this.left+pieceSize/2, this.top + pieceSize/2]
+                for(var ei=this.enemies.length -1; ei>=0; ei--){
+                    if(this.enemies[ei]<0){
+                        console.warn(this.enemies[ei])
+                    }else if(this.enemies[ei] > (theEnemies.length-1)){
+                        console.warn(this.enemies[ei])
+                    }
+                    console.log(this.enemies[ei])
+                    var theenemy = theEnemies[this.enemies[ei]]
+                    console.log(theenemy)
+                    var tar = [theenemy.left+theenemy.size/2, theenemy.top + theenemy.size/2]
+
+                    var sz = 3+this.power; 
+                    var co = [200,180,0,0.8]
+                    if(this.type == "base"){
+                        co = [200,123,50,0.8]
+                    }
+                    if(this.subtype == "slow"){
+                        co = [0,200,200,0.8]
+                    }
+                    // console.log('herereer')
+                    drawLine(sor,tar,sz,co)
+                }
+            
             }
         }
         this.doDamage = function(){
@@ -163,6 +207,8 @@ class Piece {
                     //phaser
 
                     // if(this.subtype == "ion")
+                    //while firing ion, enemies who cross into beam get damaged.
+
 
                 }else{
                     for(var ei=this.enemies.length -1; ei>=0; ei--){

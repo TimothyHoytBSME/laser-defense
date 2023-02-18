@@ -32,7 +32,7 @@ var gridSizePix = [1,1] //gets calculated
 var gridPos = [10,10] //gets calculated
 var numPaths = 2;
 var paths = new Array(numPaths).fill([]); //gets calculated
-var startGold = 100  ;
+var startGold = 1000  ; //100
 var gold = startGold;
 var numEnemies = 20; //gets calculated
 var theEnemies = [];   //gets calculated
@@ -707,8 +707,37 @@ const checkRelease = function(){
                 var thesel = gameGrid[selected[0]][selected[1]]
                 var thetar = gameGrid[target[0]][target[1]]
                 console.log(thesel, "dropped on", thetar)
-            }
+                if(thesel.subtype == "ion" ||thesel.subtype == "phaser"){
+                    if(thetar.type == "path"){
+                        //path targetting tower dragged to pathpoint, set coods as enemy
+                        if(thesel.numShots >0){
 
+                            if(thesel.enemies[0].length == 2){
+                                if(!thesel.enemies.includes(target)){
+                                    thesel.enemies.push(target)
+                                    console.log('path enemy added')
+                                    thesel.timers[thesel.enemies.length-1] = [thesel.power*100]   //timer is [frames, index of piece.enemies[]]
+                                }
+                            }else{
+                                thesel.enemies[0] = target
+                                console.log('first path enemy')
+                                thesel.timers[0]=thesel.power*100;
+                            }
+
+                            console.log('used shot')
+                            if(thesel.numShots == 1){
+                                console.log('deplete if full')
+                                if(thesel.charge >= 100){
+                                    console.log('depleted')
+                                    thesel.charge = 0
+                                }
+                            }
+                            thesel.numShots --
+
+                        }
+                    }
+                }
+            }
         }
         
         target = [-1,-1]
