@@ -41,7 +41,7 @@ var startDelay = 100; //500
 var eDelayCount = 0;    //gets calculated
 var sDelayCount = 0;    //gets calculated
 var activeEnemies = 0;   //gets calculated
-var theDefences = [];    //gets calculated
+var theDefenses = [];    //gets calculated
 var waveRunning = true;   //gets calculated
 var waveNum = 1;    //gets calculated
 var theBase = {};    //gets calculated
@@ -201,8 +201,8 @@ const activateEnemy = function(){
 
 const findTheEnemies = function(){
     if(waveRunning){
-        for(var i=0; i<theDefences.length; i++){
-            theDefences[i].findEnemies()
+        for(var i=0; i<theDefenses.length; i++){
+            theDefenses[i].findEnemies()
         }
         theBase.findEnemies()
     }
@@ -224,8 +224,8 @@ const drawEnemies = function(){
 
 const drawLasers = function(){
     if(waveRunning){
-        for(var i=0; i<theDefences.length; i++){
-            theDefences[i].drawLaser()
+        for(var i=0; i<theDefenses.length; i++){
+            theDefenses[i].drawLaser()
         }
         theBase.drawLaser()
     }
@@ -234,8 +234,8 @@ const drawLasers = function(){
 
 const doDamages = function(){
     if(waveRunning){
-        for(var i=0; i<theDefences.length; i++){
-            theDefences[i].doDamage()
+        for(var i=0; i<theDefenses.length; i++){
+            theDefenses[i].doDamage()
         }
         theBase.doDamage()
     }
@@ -423,7 +423,7 @@ const doNew = function(){
         console.log('game resetting')
         score = 0;
         gold = startGold;
-        theDefences = [];
+        theDefenses = [];
         theEnemies = [];
         activeEnemies = []
         sDelayCount = 0
@@ -556,7 +556,7 @@ const click = function(){ //mousedown
                     gold+=choosingFor.cost/2;
                     choosingFor.type = "empty"
                     choosingFor.color = [5,5,5]
-                    removeFromArray(theDefences,choosingFor)
+                    removeFromArray(theDefenses,choosingFor)
                     choosingFor = null
                     options=[]
                     waveRunning = true;
@@ -581,7 +581,7 @@ const click = function(){ //mousedown
                                         choosingFor.type = "defense"
                                         choosingFor.subtype = options[i]
                                         choosingFor.cost = startPrices[i]
-                                        theDefences.push(choosingFor)
+                                        theDefenses.push(choosingFor)
                                         console.log('built tower ',choosingFor.subtype)
                                     }
                                 }else if(choosingFor.type == "defense"){
@@ -716,12 +716,12 @@ const checkRelease = function(){
                                 if(!thesel.enemies.includes(target)){
                                     thesel.enemies.push(target)
                                     console.log('path enemy added')
-                                    thesel.timers[thesel.enemies.length-1] = [thesel.power*100]   //timer is [frames, index of piece.enemies[]]
+                                    thesel.timers[thesel.enemies.length-1] = 100 + 50*thesel.power  //timer is [frames, index of piece.enemies[]]
                                 }
                             }else{
                                 thesel.enemies[0] = target
                                 console.log('first path enemy')
-                                thesel.timers[0]=thesel.power*100;
+                                thesel.timers[0]=100+50*thesel.power;
                             }
 
                             console.log('used shot')

@@ -23,7 +23,7 @@ class Piece {
         this.power = 1
         this.charge = 0
         this.numShots = 0
-        this.chargeRate = 0.3
+        this.chargeRate = 1 //0.3
         this.timers = []
 
         this.draw = () => {
@@ -54,13 +54,15 @@ class Piece {
                         if(waveRunning){
                             this.charge += this.chargeRate;
                         }
-                        console.log('charging')
+                        // console.log('charging')
                     }
                 }
 
                 var chargeRec = [this.left, this.top+pieceSize*0.9, pieceSize*(this.charge/100), pieceSize*0.1]
                 
                 fillRec(chargeRec,[255,50,10])
+
+                
 
                 
             }
@@ -103,8 +105,6 @@ class Piece {
             
         }
         this.drawLaser = ()=>{
-            
-            console.log('drawing lasers for', this.enemies)
             var pointcount = 0;
             for(var i=0; i<this.enemies.length; i++){
                 if(this.enemies[i].length == 2){
@@ -112,39 +112,18 @@ class Piece {
                 }
             }
             if(pointcount > 0){
-
                 for(var i=0; i<this.enemies.length; i++){
                     if(this.enemies[i].length == 2){ //path point [x,y]
                         if(this.timers[i]>0){
-                            this.timers[i]--
-                            // console.log()
+                            this.timers[i]-= gameSpeedMult
                             if(this.subtype == "ion"){
-                                // console.warn('oh yea')
                                 var paCo = this.enemies[i];
                                 var enem = gameGrid[paCo[0]][paCo[1]]
-                                // console.log("firing at",enem)
-            
-                                drawLine([enem.left+pieceSize/2,enem.top + pieceSize/2],[enem.left+pieceSize/3,enem.top-cHeight],20,[255,120,40,0.375])
-                                drawLine([enem.left+pieceSize/2,enem.top + pieceSize/2],[enem.left+pieceSize-pieceSize/3,enem.top-cHeight],20,[255,120,40,0.375])
-                                drawLine([enem.left+pieceSize/2,enem.top + pieceSize/2],[enem.left+pieceSize/2,enem.top-cHeight],8,[255,120,40,0.375])
-        
-                                //ION laser
-                                //ion tower fires its laser from space, and is larger
-                                //tower has limited shot count(lasers)
-                                //tower must charge up (power) for each shot
-                                //CANNOT TARGET OWN BASE
-                                //limited target range
-                                //only attacks path point
-        
-        
-        
+                                drawLine([enem.left+pieceSize/2,enem.top + pieceSize/2],[enem.left+pieceSize/3,enem.top-cHeight],pieceSize/3,[255,120,40,0.375])
+                                drawLine([enem.left+pieceSize/2,enem.top + pieceSize/2],[enem.left+pieceSize-pieceSize/3,enem.top-cHeight],pieceSize/3,[255,120,40,0.375])
+                                drawLine([enem.left+pieceSize/2,enem.top + pieceSize/2],[enem.left+pieceSize/2,enem.top-cHeight],pieceSize/6,[255,120,40,0.375])
                             }else if(this.subtype == "phaser"){
-                                // if(this.charge < 100){
-                                //     this.charge += this.chargeRate;
-                                // }else{
-                                //     this.charge = 100
-                                // }
-        
+                                        
                                 //phaser laser
                                 //with more overall power than ion
                                 //travels in opposite direction along chosen path
@@ -160,17 +139,9 @@ class Piece {
                         }else{
                             this.enemies[i] = -1
                         }
-                        
-    
                     }
                 }
-                
-
-
             }else if(this.enemies[0] != -1){
-                // console.log(this.enemies[0])
-
-            
                 var sor = [this.left+pieceSize/2, this.top + pieceSize/2]
                 for(var ei=this.enemies.length -1; ei>=0; ei--){
                     if(this.enemies[ei]<0){
@@ -178,12 +149,12 @@ class Piece {
                     }else if(this.enemies[ei] > (theEnemies.length-1)){
                         console.warn(this.enemies[ei])
                     }
-                    console.log(this.enemies[ei])
+                    // console.log(this.enemies[ei])
                     var theenemy = theEnemies[this.enemies[ei]]
-                    console.log(theenemy)
+                    // console.log(theenemy)
                     var tar = [theenemy.left+theenemy.size/2, theenemy.top + theenemy.size/2]
 
-                    var sz = 3+this.power; 
+                    var sz = (3+this.power)*pieceSize/60; 
                     var co = [200,180,0,0.8]
                     if(this.type == "base"){
                         co = [200,123,50,0.8]
@@ -199,47 +170,63 @@ class Piece {
         }
         this.doDamage = function(){
 
-            
-            if(this.enemies[0] > -1){
-                if(this.enemies[0].subtype == "path"){
-                    //todo
-                    //ion
-                    //phaser
 
-                    // if(this.subtype == "ion")
-                    //while firing ion, enemies who cross into beam get damaged.
-
-
-                }else{
-                    for(var ei=this.enemies.length -1; ei>=0; ei--){
-                        var theenemy = theEnemies[this.enemies[ei]]
-                        if(theenemy != undefined){
-                            if(this.subtype == "basic"){
-                                if(theenemy.health > this.power){
-                                    var attackOffset = 0.75;
-                                    var hit = (this.power+attackOffset-theenemy.armor)*gameSpeedMult/2
-                                    theenemy.health -= (hit >0)? hit : 0
-                                }else{
-                                    theenemy.health = 0
-                                    theenemy.destroy()
-                                    score+=theenemy.reward
-                                    gold+=theenemy.reward
-                                    if(ei > 0){
-                                        this.enemies.pop()
-                                    }else{
-                                        this.enemies[0] = -1
+            // console.log('drawing lasers for', this.enemies)
+            var pointcount = 0;
+            for(var i=0; i<this.enemies.length; i++){
+                if(this.enemies[i].length == 2){
+                    pointcount++
+                }
+            }
+            if(pointcount > 0){
+                if(this.subtype == "ion"){
+                    for(var i=0; i<activeEnemies; i++){
+                        for(var j = 0; j<this.enemies.length; j++){
+                            var theE = theEnemies[i]
+                            if(theE){
+                                var pathTile = gameGrid[this.enemies[j][0]][this.enemies[j][1]]
+                                var pTC = [pathTile.left+pieceSize/2,pathTile.top+pieceSize/2]
+                                var lw = pieceSize/3
+                                if((theE.left < pTC[0]+lw/2)&&(theE.left+theE.size > pTC[0]-lw/2)){
+                                    if((theE.top < pTC[1]+lw/2)&&(theE.top+theE.size > pTC[1]-lw/2)){
+                                        strokeRec([theE.left,theE.top,theE.size,theE.size],pieceSize/50,[255,150,40])
+                                        var hp = (this.power*3-theE.armor)*gameSpeedMult
+                                        theE.hit(hp)
                                     }
                                 }
-                            }else if(this.subtype == "slow"){
-                                theenemy.speedMod /= (this.power+1.25);
                             }
                         }
-                        
                     }
                 }
-                
+
+                if(this.subtype == "phaser"){
+                    //todo
+                }
+            }else if(this.enemies[0] > -1){
+                for(var ei=this.enemies.length -1; ei>=0; ei--){
+                    var theenemy = theEnemies[this.enemies[ei]]
+                    if(theenemy != undefined){
+                        if(this.subtype == "basic"){
+                            var aO = 0.75
+                            var hp = (this.power+aO-theenemy.armor)*gameSpeedMult/2
+                            // console.log(hp)
+                            var dead = theenemy.hit(hp)
+                            if(dead){
+                                if(ei > 0){
+                                    this.enemies.pop()
+                                }else{
+                                    this.enemies[0] = -1
+                                }
+                            }
+                        }else if(this.subtype == "slow"){
+                            theenemy.speedMod /= (this.power+1.25);
+                        }
+                    }
+                }
             }
         }
+
+        
     }
 }
 
@@ -294,7 +281,7 @@ class Enemy {
                 // }
                 fillRec(enRec, this.color);
                 fillRec([enRec[0], enRec[1]+enRec[3]*0.9, enRec[2]*this.health/100, enRec[3]*0.1], [123,255,0])
-                strokeRec(enRec, 1, [0,0,0]);
+                strokeRec(enRec, enRec[2]/20, [0,0,0]);
             }
 
         }
@@ -343,6 +330,20 @@ class Enemy {
             }
             
             
+        }
+        this.hit = function(hitp){
+            var dead = false
+            if(this.health > hitp){
+                this.health -= (hitp >0)? hitp : 0
+            }else{
+                console.warn('enemy killed')
+                this.health = 0
+                this.destroy()
+                score+=this.reward
+                gold+=this.reward
+                var dead = true
+            }
+            return dead
         }
         this.destroy = ()=>{
             this.speed = 0;

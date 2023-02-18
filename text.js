@@ -77,6 +77,14 @@ const drawTexts = function(){
             ctx.textBaseline = "middle"
             // strokeRec(doubletimeRec,2,[255,255,255])
         }
+
+        for(var i=0; i<theDefenses.length; i++){
+            if(theDefenses[i].subtype == "ion"||theDefenses[i].subtype == "phaser"){
+                console.log(theDefenses[i].numShots)
+                fillText(theDefenses[i].left+pieceSize/2,theDefenses[i].top+pieceSize/2,theDefenses[i].numShots.toString(),pieceSize/2,[0,0,0])
+            }
+        }
+
         ctx.textAlign = "left"
         ctx.textBaseline = 'bottom'
         
@@ -125,14 +133,17 @@ const drawTexts = function(){
                     fillText(popUpRec[0] + leftInc*4,top2, floor(choosingFor.health).toString(),tsize,[255,255,255])
                 }
 
-                
-                fillText(popUpRec[0] + leftInc,top1, "LASERS" ,tsize, [255,255,255])
+                if(chSubT == "ion" || chSubT == "phaser"){
+                    fillText(popUpRec[0] + leftInc,top1, "SHOTS" ,tsize, [255,255,255])
+                    fillText(popUpRec[0] + leftInc*2,top1, "POWER",tsize, [255,255,255])
+                    fillText(popUpRec[0] + leftInc*3,top1, "RATE",tsize, [255,255,255])
+                }else{
+                    fillText(popUpRec[0] + leftInc,top1, "LASERS" ,tsize, [255,255,255])
+                    fillText(popUpRec[0] + leftInc*2,top1, "POWER",tsize, [255,255,255])
+                    fillText(popUpRec[0] + leftInc*3,top1, "RANGE",tsize, [255,255,255])
+                }
                 fillText(popUpRec[0] + leftInc,top2, numLText,tsize, [255,255,255])
-
-                fillText(popUpRec[0] + leftInc*2,top1, "POWER",tsize, [255,255,255])
                 fillText(popUpRec[0] + leftInc*2,top2, powText,tsize, [255,255,255])
-                
-                fillText(popUpRec[0] + leftInc*3,top1, "RANGE",tsize, [255,255,255])
                 fillText(popUpRec[0] + leftInc*3,top2,ranText ,tsize, [255,255,255])
             }else if(changing){
                 fillText(gameCent[0],gameCent[1]-popUpRec[3]/4,"CHANGE TYPE TO",textH/2,[255,255,255])
