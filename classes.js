@@ -63,11 +63,15 @@ class Piece {
                 fillRec(chargeRec,[255,50,10])
 
                 
-
+                console.log(this.numShots)
+                ctx.textAlign = "center"
+                ctx.textBaseline = "middle"
+                fillText(this.left+pieceSize/2,this.top+pieceSize/2,this.numShots.toString(),pieceSize/2,[255,255,255,0.5])
+                ctx.textAlign = "left"
+                ctx.textBaseline = "top"
                 
             }
 
-            
         }
         this.findEnemies = ()=>{
             if (this.subtype == "ion"){
@@ -182,18 +186,23 @@ class Piece {
                 if(this.subtype == "ion"){
                     for(var i=0; i<activeEnemies; i++){
                         for(var j = 0; j<this.enemies.length; j++){
-                            var theE = theEnemies[i]
+                            var theE = theEnemies[i] //for each active enemy
                             if(theE){
-                                var pathTile = gameGrid[this.enemies[j][0]][this.enemies[j][1]]
-                                var pTC = [pathTile.left+pieceSize/2,pathTile.top+pieceSize/2]
-                                var lw = pieceSize/3
-                                if((theE.left < pTC[0]+lw/2)&&(theE.left+theE.size > pTC[0]-lw/2)){
-                                    if((theE.top < pTC[1]+lw/2)&&(theE.top+theE.size > pTC[1]-lw/2)){
-                                        strokeRec([theE.left,theE.top,theE.size,theE.size],pieceSize/50,[255,150,40])
-                                        var hp = (this.power*3-theE.armor)*gameSpeedMult
-                                        theE.hit(hp)
+                                
+                                var pC = this.enemies[j] 
+                                if(pC.length == 2){ //path point?
+                                    var pathTile = gameGrid[pC[0]][pC[1]]
+                                    var pTC = [pathTile.left+pieceSize/2,pathTile.top+pieceSize/2] //center
+                                    var lw = pieceSize/3 //laser width
+                                    if((theE.left < pTC[0]+lw/2)&&(theE.left+theE.size > pTC[0]-lw/2)){//is enemy within L/R
+                                        if((theE.top < pTC[1]+lw/2)&&(theE.top+theE.size > pTC[1]-lw/2)){//is enemy within T/B
+                                            strokeRec([theE.left,theE.top,theE.size,theE.size],pieceSize/50,[255,150,40])//damage highligt
+                                            var hp = (this.power*3-theE.armor)*gameSpeedMult // hitpoints
+                                            theE.hit(hp)    //apply the damage
+                                        }
                                     }
                                 }
+                                
                             }
                         }
                     }

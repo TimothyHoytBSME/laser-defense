@@ -709,31 +709,49 @@ const checkRelease = function(){
                 console.log(thesel, "dropped on", thetar)
                 if(thesel.subtype == "ion" ||thesel.subtype == "phaser"){
                     if(thetar.type == "path"){
-                        //path targetting tower dragged to pathpoint, set coods as enemy
-                        if(thesel.numShots >0){
+                        var newEn = true;
+                        for(var i = 0; i<thesel.enemies.length; i++){
+                            if(thesel.enemies[i].length == 2){
+                                console.log('previous path point found')
+                                if(arrEq(thesel.enemies[i],target)){
+                                    console.warn('match found')
+                                    newEn = false;
+                                }
+                            }
+                        }
+                        if(newEn){ //current target not already an enemy
+                            console.warn('new path point detected')
+                        
+                            //path targetting tower dragged to pathpoint, set coods as enemy
+                            if(thesel.numShots >0){
+                                //add target to que and adjust numbers
 
-                            if(thesel.enemies[0].length == 2){
-                                if(!thesel.enemies.includes(target)){
-                                    thesel.enemies.push(target)
-                                    console.log('path enemy added')
+                                //if existing enemy is path point
+                                if(thesel.enemies[0].length == 2){ 
+                                    thesel.enemies.push(target) //add current to que
                                     thesel.timers[thesel.enemies.length-1] = 100 + 50*thesel.power  //timer is [frames, index of piece.enemies[]]
+                                    console.log('path enemy added')
+                                }else{ //first enemy not path point
+                                    thesel.enemies[0] = target //set first enemy to current target
+                                    thesel.timers[0]=100+50*thesel.power;
+                                    console.log('first path enemy')
                                 }
-                            }else{
-                                thesel.enemies[0] = target
-                                console.log('first path enemy')
-                                thesel.timers[0]=100+50*thesel.power;
-                            }
 
-                            console.log('used shot')
-                            if(thesel.numShots == 1){
-                                console.log('deplete if full')
-                                if(thesel.charge >= 100){
-                                    console.log('depleted')
-                                    thesel.charge = 0
+
+                                //if ony one shot is available
+                                if(thesel.numShots < thesel.numLasers){
+                                        //must be charging, do not deplete                                
+                                }else{ //shots == lasers
+                                    //must be full
+                                    thesel.charge = 0 //deplete charge
                                 }
-                            }
-                            thesel.numShots --
 
+
+                                thesel.numShots --
+
+                                console.log('used shot')
+
+                            }
                         }
                     }
                 }

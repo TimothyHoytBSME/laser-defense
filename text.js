@@ -78,12 +78,7 @@ const drawTexts = function(){
             // strokeRec(doubletimeRec,2,[255,255,255])
         }
 
-        for(var i=0; i<theDefenses.length; i++){
-            if(theDefenses[i].subtype == "ion"||theDefenses[i].subtype == "phaser"){
-                console.log(theDefenses[i].numShots)
-                fillText(theDefenses[i].left+pieceSize/2,theDefenses[i].top+pieceSize/2,theDefenses[i].numShots.toString(),pieceSize/2,[0,0,0])
-            }
-        }
+        
 
         ctx.textAlign = "left"
         ctx.textBaseline = 'bottom'
