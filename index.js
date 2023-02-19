@@ -595,6 +595,7 @@ const click = function(){ //mousedown
                                         choosingFor.cost += thePrice
                                     }else if(options[i] == "upgrade3"){
                                         choosingFor.range++
+                                        choosingFor.chargeRate++
                                         choosingFor.cost += thePrice
                                         console.log('upgraded tower range',choosingFor)
                                     }else if(options[i] == "change"){
@@ -710,15 +711,18 @@ const checkRelease = function(){
                 if(thesel.subtype == "ion" ||thesel.subtype == "phaser"){
                     if(thetar.type == "path"){
                         var newEn = true;
-                        for(var i = 0; i<thesel.enemies.length; i++){
-                            if(thesel.enemies[i].length == 2){
-                                console.log('previous path point found')
-                                if(arrEq(thesel.enemies[i],target)){
-                                    console.warn('match found')
-                                    newEn = false;
+                        if(this.subtype == "ion"){
+                            for(var i = 0; i<thesel.enemies.length; i++){
+                                if(thesel.enemies[i].length == 2){
+                                    console.log('previous path point found')
+                                    if(arrEq(thesel.enemies[i],target)){
+                                        console.warn('match found')
+                                        newEn = false;
+                                    }
                                 }
                             }
                         }
+                        
                         if(newEn){ //current target not already an enemy
                             console.warn('new path point detected')
                         
@@ -738,15 +742,11 @@ const checkRelease = function(){
                                 }
 
 
-                                //if ony one shot is available
-                                if(thesel.numShots < thesel.numLasers){
-                                        //must be charging, do not deplete                                
-                                }else{ //shots == lasers
-                                    //must be full
+                                //if shots are full, deplete to recharge
+                                if(thesel.numShots == thesel.numLasers){
                                     thesel.charge = 0 //deplete charge
                                 }
-
-
+                                
                                 thesel.numShots --
 
                                 console.log('used shot')

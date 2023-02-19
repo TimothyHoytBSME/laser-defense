@@ -23,7 +23,7 @@ class Piece {
         this.power = 1
         this.charge = 0
         this.numShots = 0
-        this.chargeRate = 1 //0.3
+        this.chargeRate = 1
         this.timers = []
 
         this.draw = () => {
@@ -52,7 +52,12 @@ class Piece {
                         this.charge = 100
                     }else{
                         if(waveRunning){
-                            this.charge += this.chargeRate;
+                            if(this.subtype == "ion"){
+                                this.charge += (0.25+(this.chargeRate**3-1)*0.01)*gameSpeedMult;
+                            }else if(this.subtype == "phaser"){
+                                this.charge += (0.15+(this.chargeRate**3-1)*0.003)*gameSpeedMult;
+                                
+                            }
                         }
                         // console.log('charging')
                     }
@@ -63,7 +68,7 @@ class Piece {
                 fillRec(chargeRec,[255,50,10])
 
                 
-                console.log(this.numShots)
+                // console.log(this.numShots)
                 ctx.textAlign = "center"
                 ctx.textBaseline = "middle"
                 fillText(this.left+pieceSize/2,this.top+pieceSize/2,this.numShots.toString(),pieceSize/2,[255,255,255,0.5])
@@ -74,7 +79,7 @@ class Piece {
 
         }
         this.findEnemies = ()=>{
-            if (this.subtype == "ion"){
+            if ((this.subtype == "ion")||(this.subtype == "phaser")){
                 //do nothing, enemy set as path coordinate when drag and drop
                 
             }else{
@@ -113,30 +118,56 @@ class Piece {
             for(var i=0; i<this.enemies.length; i++){
                 if(this.enemies[i].length == 2){
                     pointcount++
+                    
                 }
             }
             if(pointcount > 0){
                 for(var i=0; i<this.enemies.length; i++){
+                    console.log('enemy', i, 'is', this.enemies[i])
                     if(this.enemies[i].length == 2){ //path point [x,y]
                         if(this.timers[i]>0){
                             this.timers[i]-= gameSpeedMult
                             if(this.subtype == "ion"){
                                 var paCo = this.enemies[i];
-                                var enem = gameGrid[paCo[0]][paCo[1]]
-                                drawLine([enem.left+pieceSize/2,enem.top + pieceSize/2],[enem.left+pieceSize/3,enem.top-cHeight],pieceSize/3,[255,120,40,0.375])
-                                drawLine([enem.left+pieceSize/2,enem.top + pieceSize/2],[enem.left+pieceSize-pieceSize/3,enem.top-cHeight],pieceSize/3,[255,120,40,0.375])
-                                drawLine([enem.left+pieceSize/2,enem.top + pieceSize/2],[enem.left+pieceSize/2,enem.top-cHeight],pieceSize/6,[255,120,40,0.375])
+                                var pathT = gameGrid[paCo[0]][paCo[1]]
+                                drawLine([pathT.left+pieceSize/2,pathT.top + pieceSize/2],[pathT.left+pieceSize/3,pathT.top-cHeight],pieceSize/3,[255,120,40,0.375])
+                                drawLine([pathT.left+pieceSize/2,pathT.top + pieceSize/2],[pathT.left+pieceSize-pieceSize/3,pathT.top-cHeight],pieceSize/3,[255,120,40,0.375])
+                                drawLine([pathT.left+pieceSize/2,pathT.top + pieceSize/2],[pathT.left+pieceSize/2,pathT.top-cHeight],pieceSize/6,[255,120,40,0.375])
                             }else if(this.subtype == "phaser"){
-                                        
-                                //phaser laser
-                                //with more overall power than ion
-                                //travels in opposite direction along chosen path
-                                //attacking all enemeies in the path
-                                //moves faster than the enemies on average
-                                //Always only 1 shot, but it is effective
-                                //laser count is actually speed
-                                //recharge slightly faster than ion
-                                //
+                                var paCo = this.enemies[i];
+                                var paCoIn = undefined
+                                var pathNum = undefined
+                                for(var p=0; p<paths.length; p++){
+                                    for(var t=0; t<paths[p].length; t++){
+                                        if(arrEq(paths[p][t],paCo)){
+                                            pathNum = p
+                                            paCoIn = t
+                                        }
+                                    }
+                                }
+                                if(pathNum != undefined){
+                                    var path = paths[0]
+                                    var nextP = path[paCoIn+1]
+                                    var dir = [nextP[0]-paCo[0],nextP[1]-paCo[1]]
+                                    console.log('dir',dir)
+                                    var pathT = gameGrid[paCo[0]][paCo[1]]
+                                    var lasC = [pathT.left+pieceSize/2, pathT.top + pieceSize/2]
+                                    drawLine(lasC,[pathT.left+pieceSize/3,pathT.top-cHeight],pieceSize/3,[12,100,255,0.375])
+                                    drawLine(lasC,[pathT.left+pieceSize-pieceSize/3,pathT.top-cHeight],pieceSize/3,[12,100,255,0.375])
+                                    drawLine(lasC,[pathT.left+pieceSize/2,pathT.top-cHeight],pieceSize/6,[12,100,255,0.375])
+    
+                                    //phaser laser
+                                    //with more overall power than ion
+                                    //travels in opposite direction along chosen path
+                                    //attacking all enemeies in the path
+                                    //moves faster than the enemies on average
+                                    //Always only 1 shot, but it is effective
+                                    //laser count is actually speed
+                                    //recharge slightly faster than ion
+                                    //
+                                }else{
+                                    console.log('pathNum invalid',pathNum)
+                                }
         
         
                             }
