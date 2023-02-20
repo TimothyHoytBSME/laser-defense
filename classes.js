@@ -170,9 +170,9 @@ class Piece {
                                         
                                     }
 
-                                    drawLine(lasC,[lasC[0]+pieceSize/3,lasC[1]-cHeight],pieceSize/3,[12,100,255,0.375])
-                                    drawLine(lasC,[lasC[0]+pieceSize-pieceSize/3,lasC[1]-cHeight],pieceSize/3,[12,100,255,0.375])
-                                    drawLine(lasC,[lasC[0]+pieceSize/2,lasC[1]-cHeight],pieceSize/6,[12,100,255,0.375])
+                                    drawLine(lasC,[lasC[0]-pieceSize/6,lasC[1]-cHeight],pieceSize/3,[12,100,255,0.375])
+                                    drawLine(lasC,[lasC[0]+pieceSize/6,lasC[1]-cHeight],pieceSize/3,[12,100,255,0.375])
+                                    drawLine(lasC,[lasC[0],lasC[1]-cHeight],pieceSize/6,[12,100,255,0.375])
     
                                     //phaser laser
                                 }
@@ -226,11 +226,11 @@ class Piece {
                 }
             }
             if(pointcount > 0){
-                for(var i=0; i<activeEnemies; i++){
+                for(var i=0; i<theEnemies.length; i++){
                     for(var j = 0; j<this.enemies.length; j++){
-                        var theE = theEnemies[i] //for each active enemy
+                        var theE = theEnemies[i] //for each enemy
                         if(theE){
-                            var pC = this.enemies[j] //for each target
+                            var pC = this.enemies[j] //for each targeted enemy
                             if(pC.length == 2){ //path point?
                                 var pathTile = gameGrid[pC[0]][pC[1]] //path tile
                                 var pTC = [pathTile.left+pieceSize/2,pathTile.top+pieceSize/2] //path tile center
@@ -256,33 +256,36 @@ class Piece {
                                         if((pCiN+1 < path.length)){
                                             var nextP = path[pCiN+1]
                                             var dir = [nextP[0]-pC[0],nextP[1]-pC[1]]
-
                                             var timeOffset = (this.timers[i] + this.timesUsed[i])
                                             pTC[0] = pTC[0]+dir[0]*(this.maxTimes[i] - timeOffset)*2
                                             pTC[1] = pTC[1]+dir[1]*(this.maxTimes[i] - timeOffset)*2
 
                                         }
                                     }
-
-                                    
                                 }
-
 
                                 if((theE.left < pTC[0]+lw/2)&&(theE.left+theE.size > pTC[0]-lw/2)){//is enemy within L/R
                                     if((theE.top < pTC[1]+lw/2)&&(theE.top+theE.size > pTC[1]-lw/2)){//is enemy within T/B
-                                        strokeRec([theE.left,theE.top,theE.size,theE.size],pieceSize/50,[255,150,40])//damage highligt
-                                        var hp = 4*(this.power*3-theE.armor)*gameSpeedMult // hitpoints
-                                        theE.hit(hp)    //apply the damage
+                                        
+                                        
+                                        if(this.subtype == "ion"){
+                                            fillCir([theE.left+theE.size/2, theE.top+theE.size/2,theE.size/2],[255,255,255,0.8])
+                                            strokeRec([theE.left,theE.top,theE.size,theE.size],pieceSize/50,[255,150,40])//damage highligt
+                                            var hp = 4*(this.power*3-theE.armor)*gameSpeedMult // hitpoints
+                                            theE.hit(hp)    //apply the damage
+                                        }
+                                        if(this.subtype == "phaser"){
+                                            theE.color = [0,0,200]
+                                            strokeRec([theE.left,theE.top,theE.size,theE.size],pieceSize/50,[40,150,255])//damage highligt
+
+                                        }
+                                        
                                     }
                                 }
-
                             }
-
                         }
                     }
                 }
-            
-
                 
             }else if(this.enemies[0] > -1){
                 for(var ei=this.enemies.length -1; ei>=0; ei--){
