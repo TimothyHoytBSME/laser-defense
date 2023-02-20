@@ -24,7 +24,9 @@ class Piece {
         this.charge = 0
         this.numShots = 0
         this.chargeRate = 1
-        this.timers = []
+        this.timers = new Array(1000).fill(0)
+        this.maxTimes = new Array(1000).fill(0)
+        this.timesUsed = new Array(1000).fill(0)
 
         this.draw = () => {
             
@@ -122,19 +124,19 @@ class Piece {
                 }
             }
             if(pointcount > 0){
+
                 for(var i=0; i<this.enemies.length; i++){
-                    console.log('enemy', i, 'is', this.enemies[i])
                     if(this.enemies[i].length == 2){ //path point [x,y]
                         if(this.timers[i]>0){
                             this.timers[i]-= gameSpeedMult
+                            var paCo = this.enemies[i];
+                            var pathT = gameGrid[paCo[0]][paCo[1]]
+
                             if(this.subtype == "ion"){
-                                var paCo = this.enemies[i];
-                                var pathT = gameGrid[paCo[0]][paCo[1]]
                                 drawLine([pathT.left+pieceSize/2,pathT.top + pieceSize/2],[pathT.left+pieceSize/3,pathT.top-cHeight],pieceSize/3,[255,120,40,0.375])
                                 drawLine([pathT.left+pieceSize/2,pathT.top + pieceSize/2],[pathT.left+pieceSize-pieceSize/3,pathT.top-cHeight],pieceSize/3,[255,120,40,0.375])
                                 drawLine([pathT.left+pieceSize/2,pathT.top + pieceSize/2],[pathT.left+pieceSize/2,pathT.top-cHeight],pieceSize/6,[255,120,40,0.375])
                             }else if(this.subtype == "phaser"){
-                                var paCo = this.enemies[i];
                                 var paCoIn = undefined
                                 var pathNum = undefined
                                 for(var p=0; p<paths.length; p++){
@@ -146,33 +148,43 @@ class Piece {
                                     }
                                 }
                                 if(pathNum != undefined){
-                                    var path = paths[0]
-                                    var nextP = path[paCoIn+1]
-                                    var dir = [nextP[0]-paCo[0],nextP[1]-paCo[1]]
-                                    console.log('dir',dir)
-                                    var pathT = gameGrid[paCo[0]][paCo[1]]
+                                    var path = paths[pathNum]
                                     var lasC = [pathT.left+pieceSize/2, pathT.top + pieceSize/2]
-                                    drawLine(lasC,[pathT.left+pieceSize/3,pathT.top-cHeight],pieceSize/3,[12,100,255,0.375])
-                                    drawLine(lasC,[pathT.left+pieceSize-pieceSize/3,pathT.top-cHeight],pieceSize/3,[12,100,255,0.375])
-                                    drawLine(lasC,[pathT.left+pieceSize/2,pathT.top-cHeight],pieceSize/6,[12,100,255,0.375])
+                                    if((paCoIn+1 < path.length)){
+                                        //next tile exists
+                                        var nextP = path[paCoIn+1]
+                                        var dir = [nextP[0]-paCo[0],nextP[1]-paCo[1]]
+                                        var nextPT = gameGrid[nextP[0]][nextP[1]]
+                                        var nextPC = [nextPT.left+pieceSize/2,nextPT.top+pieceSize/2]
+                                        //apply movement
+                                        var timeOffset = (this.timers[i] + this.timesUsed[i])
+                                        lasC[0] = lasC[0]+dir[0]*(this.maxTimes[i] - timeOffset)*2
+                                        lasC[1] = lasC[1]+dir[1]*(this.maxTimes[i] - timeOffset)*2
+
+                                        if((dir[0]*(lasC[0]-nextPC[0])>0)||(dir[1]*(lasC[1]-nextPC[1])>0)){
+                                            //past next point LR or TB
+                                            this.enemies[i] = [...nextP] //start fresh at new point
+                                            lasC = [...nextPC] // move from new point
+                                            this.timesUsed[i] = this.maxTimes[i] - this.timers[i]//adjust timer for next run
+                                        }
+                                        
+                                    }
+
+                                    drawLine(lasC,[lasC[0]+pieceSize/3,lasC[1]-cHeight],pieceSize/3,[12,100,255,0.375])
+                                    drawLine(lasC,[lasC[0]+pieceSize-pieceSize/3,lasC[1]-cHeight],pieceSize/3,[12,100,255,0.375])
+                                    drawLine(lasC,[lasC[0]+pieceSize/2,lasC[1]-cHeight],pieceSize/6,[12,100,255,0.375])
     
                                     //phaser laser
-                                    //with more overall power than ion
-                                    //travels in opposite direction along chosen path
-                                    //attacking all enemeies in the path
-                                    //moves faster than the enemies on average
-                                    //Always only 1 shot, but it is effective
-                                    //laser count is actually speed
-                                    //recharge slightly faster than ion
-                                    //
-                                }else{
-                                    console.log('pathNum invalid',pathNum)
                                 }
         
         
                             }
                         }else{
+                            //timer is up , reset trackers
                             this.enemies[i] = -1
+                            this.timers[i] = 0
+                            this.timesUsed[i] = 0
+                            this.maxTimes[i] = 0
                         }
                     }
                 }
@@ -214,34 +226,64 @@ class Piece {
                 }
             }
             if(pointcount > 0){
-                if(this.subtype == "ion"){
-                    for(var i=0; i<activeEnemies; i++){
-                        for(var j = 0; j<this.enemies.length; j++){
-                            var theE = theEnemies[i] //for each active enemy
-                            if(theE){
-                                
-                                var pC = this.enemies[j] 
-                                if(pC.length == 2){ //path point?
-                                    var pathTile = gameGrid[pC[0]][pC[1]]
-                                    var pTC = [pathTile.left+pieceSize/2,pathTile.top+pieceSize/2] //center
-                                    var lw = pieceSize/3 //laser width
-                                    if((theE.left < pTC[0]+lw/2)&&(theE.left+theE.size > pTC[0]-lw/2)){//is enemy within L/R
-                                        if((theE.top < pTC[1]+lw/2)&&(theE.top+theE.size > pTC[1]-lw/2)){//is enemy within T/B
-                                            strokeRec([theE.left,theE.top,theE.size,theE.size],pieceSize/50,[255,150,40])//damage highligt
-                                            var hp = (this.power*3-theE.armor)*gameSpeedMult // hitpoints
-                                            theE.hit(hp)    //apply the damage
+                for(var i=0; i<activeEnemies; i++){
+                    for(var j = 0; j<this.enemies.length; j++){
+                        var theE = theEnemies[i] //for each active enemy
+                        if(theE){
+                            var pC = this.enemies[j] //for each target
+                            if(pC.length == 2){ //path point?
+                                var pathTile = gameGrid[pC[0]][pC[1]] //path tile
+                                var pTC = [pathTile.left+pieceSize/2,pathTile.top+pieceSize/2] //path tile center
+                                var lw = pieceSize/3 //laser width
+
+                                if(this.subtype == "ion"){
+                                    //do nothing
+                                }else if(this.subtype == "phaser"){
+                                    //adjust PTC to reflect new position
+                                    var pCiN = undefined
+                                    var pathN = undefined
+                                    for(var p=0; p<paths.length; p++){
+                                        for(var t=0; t<paths[p].length; t++){
+                                            if(arrEq(paths[p][t],pC)){
+                                                pathN = p
+                                                pCiN = t
+                                            }
                                         }
                                     }
+
+                                    if(pathN != undefined){
+                                        var path = paths[pathN]
+                                        if((pCiN+1 < path.length)){
+                                            var nextP = path[pCiN+1]
+                                            var dir = [nextP[0]-pC[0],nextP[1]-pC[1]]
+
+                                            var timeOffset = (this.timers[i] + this.timesUsed[i])
+                                            pTC[0] = pTC[0]+dir[0]*(this.maxTimes[i] - timeOffset)*2
+                                            pTC[1] = pTC[1]+dir[1]*(this.maxTimes[i] - timeOffset)*2
+
+                                        }
+                                    }
+
+                                    
                                 }
-                                
+
+
+                                if((theE.left < pTC[0]+lw/2)&&(theE.left+theE.size > pTC[0]-lw/2)){//is enemy within L/R
+                                    if((theE.top < pTC[1]+lw/2)&&(theE.top+theE.size > pTC[1]-lw/2)){//is enemy within T/B
+                                        strokeRec([theE.left,theE.top,theE.size,theE.size],pieceSize/50,[255,150,40])//damage highligt
+                                        var hp = 4*(this.power*3-theE.armor)*gameSpeedMult // hitpoints
+                                        theE.hit(hp)    //apply the damage
+                                    }
+                                }
+
                             }
+
                         }
                     }
                 }
+            
 
-                if(this.subtype == "phaser"){
-                    //todo
-                }
+                
             }else if(this.enemies[0] > -1){
                 for(var ei=this.enemies.length -1; ei>=0; ei--){
                     var theenemy = theEnemies[this.enemies[ei]]

@@ -32,7 +32,7 @@ var gridSizePix = [1,1] //gets calculated
 var gridPos = [10,10] //gets calculated
 var numPaths = 2;
 var paths = new Array(numPaths).fill([]); //gets calculated
-var startGold = 1000  ; //100
+var startGold = 10000  ; //100
 var gold = startGold;
 var numEnemies = 20; //gets calculated
 var theEnemies = [];   //gets calculated
@@ -734,10 +734,12 @@ const checkRelease = function(){
                                 if(thesel.enemies[0].length == 2){ 
                                     thesel.enemies.push(target) //add current to que
                                     thesel.timers[thesel.enemies.length-1] = 100 + 50*thesel.power  //timer is [frames, index of piece.enemies[]]
+                                    thesel.maxTimes[thesel.enemies.length-1] = 100 + 50*thesel.power
                                     console.log('path enemy added')
                                 }else{ //first enemy not path point
                                     thesel.enemies[0] = target //set first enemy to current target
                                     thesel.timers[0]=100+50*thesel.power;
+                                    thesel.maxTimes[0]=100+50*thesel.power;
                                     console.log('first path enemy')
                                 }
 
