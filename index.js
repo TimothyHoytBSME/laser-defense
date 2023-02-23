@@ -19,6 +19,7 @@ var newButtonRec = [] //gets calculated
 var menuButtonRec = [] //gets calculated
 var sellButtonRec = [] //gets calculated
 var doubletimeRec = [] //gets calculated
+var fivetimeRec = [] //gets calculated
 
 var cancelButtonRec = [] //gets calculated
 var optionsRecs = [] //gets calculated
@@ -66,11 +67,16 @@ var unfocusedTime = new Date();
 var nowaveLapse = 0;
 var nowaveTime = new Date();
 
+var lastTime = 0;
+var currTime = new Date()
+var fps = 0;
 
 
 //Main Animation Loop
 const mainLoop = function(){
-    const currTime = new Date();
+    lastTime = currTime;
+    currTime = new Date();
+    fps = 1/((currTime.getTime()-lastTime.getTime())/1000)
     
     
     ctx.fillStyle = "rgb(0, 0, 0)"; ctx.fillRect(0, 0, cWidth, cHeight);
@@ -144,6 +150,7 @@ const mainLoop = function(){
     //////////////////////////////next frame////////////////////////////////
     const fpsMax = 60;
 
+    
     setTimeout(() => {
         window.requestAnimationFrame(mainLoop);
     }, 1000 / fpsMax);
@@ -521,6 +528,15 @@ const click = function(){ //mousedown
                     gameSpeedMult = 1
                 }else{
                     gameSpeedMult = 2
+                }
+            }
+
+            if(isInside([mdX,mdY],fivetimeRec)){
+                console.log('gamespeedchanged',gameSpeedMult)
+                if(gameSpeedMult == 10){
+                    gameSpeedMult = 1
+                }else{
+                    gameSpeedMult = 10
                 }
             }
 

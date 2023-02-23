@@ -7,6 +7,7 @@
 class Piece {
     constructor(i, j, type) {
         this.type = type
+        this.dirs = new Array(100).fill([0,0]);
         this.cost = 0;
         this.subtype = "basic"
         this.color = [5,5,5]
@@ -27,6 +28,7 @@ class Piece {
         this.timers = new Array(1000).fill(0)
         this.maxTimes = new Array(1000).fill(0)
         this.timesUsed = new Array(1000).fill(0)
+        this.timeOffsets = new Array(100).fill(0);
 
         this.draw = () => {
             
@@ -82,7 +84,7 @@ class Piece {
         }
         this.findEnemies = ()=>{
             if ((this.subtype == "ion")||(this.subtype == "phaser")){
-                //do nothing, enemy set as path coordinate when drag and drop
+                //do nothing, enemy set as path coordinate when drag and drop [x,y]
                 
             }else{
                 this.enemies = new Array(1).fill(-1)
@@ -153,15 +155,15 @@ class Piece {
                                     if((paCoIn+1 < path.length)){
                                         //next tile exists
                                         var nextP = path[paCoIn+1]
-                                        var dir = [nextP[0]-paCo[0],nextP[1]-paCo[1]]
+                                        this.dirs[i] = [nextP[0]-paCo[0],nextP[1]-paCo[1]]
                                         var nextPT = gameGrid[nextP[0]][nextP[1]]
                                         var nextPC = [nextPT.left+pieceSize/2,nextPT.top+pieceSize/2]
                                         //apply movement
-                                        var timeOffset = (this.timers[i] + this.timesUsed[i])
-                                        lasC[0] = lasC[0]+dir[0]*(this.maxTimes[i] - timeOffset)*2
-                                        lasC[1] = lasC[1]+dir[1]*(this.maxTimes[i] - timeOffset)*2
+                                        this.timeOffsets[i] = (this.timers[i] + this.timesUsed[i])
+                                        lasC[0] = lasC[0]+this.dirs[i][0]*(this.maxTimes[i] - this.timeOffsets[i])*2
+                                        lasC[1] = lasC[1]+this.dirs[i][1]*(this.maxTimes[i] - this.timeOffsets[i])*2
 
-                                        if((dir[0]*(lasC[0]-nextPC[0])>0)||(dir[1]*(lasC[1]-nextPC[1])>0)){
+                                        if((this.dirs[i][0]*(lasC[0]-nextPC[0])>0)||(this.dirs[i][1]*(lasC[1]-nextPC[1])>0)){
                                             //past next point LR or TB
                                             this.enemies[i] = [...nextP] //start fresh at new point
                                             lasC = [...nextPC] // move from new point
@@ -184,6 +186,7 @@ class Piece {
                             this.enemies[i] = -1
                             this.timers[i] = 0
                             this.timesUsed[i] = 0
+                            this.timeOffsets[i] = 0
                             this.maxTimes[i] = 0
                         }
                     }
@@ -225,65 +228,25 @@ class Piece {
                     pointcount++
                 }
             }
+            // console.log('pointount',pointcount)
             if(pointcount > 0){
-                for(var i=0; i<theEnemies.length; i++){
-                    for(var j = 0; j<this.enemies.length; j++){
-                        var theE = theEnemies[i] //for each enemy
-                        if(theE){
-                            var pC = this.enemies[j] //for each targeted enemy
-                            if(pC.length == 2){ //path point?
-                                var pathTile = gameGrid[pC[0]][pC[1]] //path tile
-                                var pTC = [pathTile.left+pieceSize/2,pathTile.top+pieceSize/2] //path tile center
-                                var lw = pieceSize/3 //laser width
+                // console.log('ion or phaser')
+                for(var i=0; i<this.enemies.length; i++){
+                    // console.log('checking for paths')
+                    if(this.enemies[i].length == 2){
+                        //do damage for ion and phaser
+                        //ion
+                        //does damage to enemy nearby during laser
+                        var thePaC = this.enemies[i]
+                        // console.log('path found', thePaC)
+                        var thePa = gameGrid[thePaC[0]][thePaC[1]]
+                        var pTC = [thePa.left + pieceSize/2 + this.dirs[i][0]*(this.maxTimes[i] - this.timeOffsets[i])*2,thePa.top + pieceSize/2 + this.dirs[i][1]*(this.maxTimes[i] - this.timeOffsets[i])*2,]
 
-                                if(this.subtype == "ion"){
-                                    //do nothing
-                                }else if(this.subtype == "phaser"){
-                                    //adjust PTC to reflect new position
-                                    var pCiN = undefined
-                                    var pathN = undefined
-                                    for(var p=0; p<paths.length; p++){
-                                        for(var t=0; t<paths[p].length; t++){
-                                            if(arrEq(paths[p][t],pC)){
-                                                pathN = p
-                                                pCiN = t
-                                            }
-                                        }
-                                    }
+                        fillCir([pTC[0],pTC[1], pieceSize*0.9/2],[255,255,255])
 
-                                    if(pathN != undefined){
-                                        var path = paths[pathN]
-                                        if((pCiN+1 < path.length)){
-                                            var nextP = path[pCiN+1]
-                                            var dir = [nextP[0]-pC[0],nextP[1]-pC[1]]
-                                            var timeOffset = (this.timers[i] + this.timesUsed[i])
-                                            pTC[0] = pTC[0]+dir[0]*(this.maxTimes[i] - timeOffset)*2
-                                            pTC[1] = pTC[1]+dir[1]*(this.maxTimes[i] - timeOffset)*2
-
-                                        }
-                                    }
-                                }
-
-                                if((theE.left < pTC[0]+lw/2)&&(theE.left+theE.size > pTC[0]-lw/2)){//is enemy within L/R
-                                    if((theE.top < pTC[1]+lw/2)&&(theE.top+theE.size > pTC[1]-lw/2)){//is enemy within T/B
-                                        
-                                        
-                                        if(this.subtype == "ion"){
-                                            fillCir([theE.left+theE.size/2, theE.top+theE.size/2,theE.size/2],[255,255,255,0.8])
-                                            strokeRec([theE.left,theE.top,theE.size,theE.size],pieceSize/50,[255,150,40])//damage highligt
-                                            var hp = 4*(this.power*3-theE.armor)*gameSpeedMult // hitpoints
-                                            theE.hit(hp)    //apply the damage
-                                        }
-                                        if(this.subtype == "phaser"){
-                                            theE.color = [0,0,200]
-                                            strokeRec([theE.left,theE.top,theE.size,theE.size],pieceSize/50,[40,150,255])//damage highligt
-
-                                        }
-                                        
-                                    }
-                                }
-                            }
-                        }
+                        //phaser
+                        //causes affliction to all that touch the laser as it moves
+                        //hitbox calc will not work
                     }
                 }
                 
